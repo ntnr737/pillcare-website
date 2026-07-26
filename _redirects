@@ -1,0 +1,8 @@
+# Force HTTPS
+http://pillcare.in/* https://pillcare.in/:splat 301
+
+# Block common attack paths
+/wp-admin/* /404 403
+/wp-login.php /404 403
+/.env /404 403
+/admin/config/* /404 403
