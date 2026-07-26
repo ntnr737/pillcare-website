@@ -1,18 +1,37 @@
-# PillCare Website + Admin Panel
+# PillCare Reminder
 
-**pillcare.in** — Marketing website and admin panel for PillCare Reminder.
+A responsive showcase website for **PillCare Reminder**, a medication reminder and health-tech product by **League of X Technologies Pvt. Ltd.**
 
-## Structure
+## About
 
+PillCare Reminder is designed to make medication routines feel clearer and more manageable through:
+
+- Timely medication reminders
+- Daily dose tracking
+- Flexible schedules
+- Progress insights
+- Caregiver-friendly experiences
+
+## Run locally
+
+No installation or build step is required.
+
+```bash
+python3 -m http.server 4173
 ```
-/
-├── index.html          ← Main website (pillcare.in)
-├── support.html        ← Support page
-├── privacy.html        ← Privacy policy
-├── delete-account.html ← Account deletion page
-├── admin.html          ← Admin dashboard (pillcare.in/admin.html)
+
+Then open [http://localhost:4173](http://localhost:4173).
+
+## Project structure
+
+```text
+.
 ├── assets/
 │   └── pillcare-logo.png
+├── index.html          ← Main website
+├── styles.css
+├── script.js
+├── admin.html          ← Admin dashboard (private)
 └── README.md
 ```
 
@@ -20,20 +39,17 @@
 
 Access at: `https://pillcare.in/admin.html`
 
-Protected by admin secret key (set as `ADMIN_SECRET` in Google Cloud Secret Manager).
-
-Features:
-- User analytics (total users, adherence, feature usage)
-- Subscription management (upgrade/downgrade any user)
+Protected by admin secret key. Features:
+- User analytics and subscription management
 - Per-user feature flag overrides
 - Revenue and MRR tracking
 
 ## Deployment
 
-Upload all files to your hosting provider root directory.
-The website is pure static HTML — no build step required.
+Deployed via Cloudflare Workers/Pages on pillcare.in
 
-## Backend
+## Company
 
-Admin panel connects to:
-`https://pillcare-backend-1082668880575.europe-west1.run.app`
+Built with care by **League of X Technologies Pvt. Ltd.**
+
+© 2026 League of X Technologies Pvt. Ltd.
