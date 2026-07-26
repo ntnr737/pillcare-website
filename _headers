@@ -4,10 +4,9 @@
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://pillcare-backend-1082668880575.europe-west1.run.app; frame-ancestors 'none'
   Strict-Transport-Security: max-age=15552000; includeSubDomains
 
 /admin.html
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store, no-cache, must-revalidate
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client https://apis.google.com; style-src 'self' 'unsafe-inline' https://accounts.google.com; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://pillcare-backend-1082668880575.europe-west1.run.app https://accounts.google.com https://oauth2.googleapis.com; frame-src https://accounts.google.com; frame-ancestors 'none'
+  X-Frame-Options: DENY
