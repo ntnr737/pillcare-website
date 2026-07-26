@@ -4,7 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PillCare Admin</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<script>
+window.handleGoogleLogin = async function(response) {
+  try {
+    const r = await fetch("https://pillcare-backend-1082668880575.europe-west1.run.app/admin/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_token: response.credential })
+    });
+    const data = await r.json();
+    if (!r.ok) { document.getElementById("loginErr").style.display="block"; document.getElementById("loginErr").textContent=data.detail||"Access denied"; return; }
+    TOKEN = data.token;
+    showApp(data.name, data.picture);
+  } catch(e) { document.getElementById("loginErr").style.display="block"; document.getElementById("loginErr").textContent="Connection error"; }
+};
+
+window.addEventListener('load', function() {
+  function tryRender() {
+    if (!window.google || !google.accounts) { setTimeout(tryRender, 200); return; }
+    google.accounts.id.initialize({
+      client_id: "1082668880575-lfoqgnieodb52b5ges1vppiv92ifbioc.apps.googleusercontent.com",
+      callback: handleGoogleLogin,
+      auto_select: false,
+    });
+    const container = document.getElementById('googleBtnContainer');
+    if (container) {
+      container.innerHTML = '';
+      google.accounts.id.renderButton(container, {
+        type: 'standard',
+        theme: 'filled_black',
+        size: 'large',
+        text: 'signin_with',
+        width: 320,
+      });
+    }
+  }
+  tryRender();
+});
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f1117;--sf:#1a1d27;--sf2:#22263a;--ac:#9184d9;--ac2:#a7a1db;--tx:#e9e9ed;--tm:rgba(233,233,237,.55);--bd:rgba(233,233,237,.1);--gr:#4ade80;--rd:#f87171;--yw:#fbbf24}
@@ -80,20 +118,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="login-icon">💊</div>
     <h1>PillCare Admin</h1>
     <p>Restricted access — sign in with your authorised Google account to continue.</p>
-
-    <div id="g_id_onload"
-      data-client_id="1082668880575-lfoqgnieodb52b5ges1vppiv92ifbioc.apps.googleusercontent.com"
-      data-callback="handleGoogleLogin"
-      data-auto_select="false">
-    </div>
-    <div class="g_id_signin"
-      data-type="standard"
-      data-size="large"
-      data-theme="filled_black"
-      data-text="signin_with"
-      data-shape="rectangular"
-      data-logo_alignment="left"
-      data-width="320">
+    <div id="googleBtnContainer" style="min-height:44px;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:12px;color:var(--tm)">Loading...</span>
     </div>
 
     <p class="err" id="loginErr" style="display:none">Access denied. Try again.</p>
