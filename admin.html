@@ -138,6 +138,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <button class="nav-item" onclick="showSection('subscriptions',this)">💳 Subscriptions</button>
     <button class="nav-item" onclick="showSection('revenue',this)">💰 Revenue</button>
     <div class="nav-sep"></div>
+    <button class="nav-item" onclick="showSection('analytics',this)">📈 Analytics</button>
     <button class="nav-item" onclick="showSection('security',this)">🛡️ Security</button>
     <div class="nav-sep"></div>
     <button class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Sign out</button>
@@ -195,6 +196,38 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </table>
       </div>
     </div>
+    <div class="section" id="sec-analytics">
+      <div class="topbar"><h2>Analytics</h2><button class="btn-sm" onclick="loadAnalytics()">↻ Refresh</button></div>
+      <div class="kpis" id="doseKpis"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-header"><h3>Dose outcomes (30 days)</h3></div>
+          <div style="padding:1.25rem">
+            <div style="display:flex;flex-direction:column;gap:8px" id="outcomeRows"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Top medications</h3></div>
+          <table><thead><tr><th>#</th><th>Medication</th><th>Doses taken</th></tr></thead>
+          <tbody id="medAnalyticsTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header"><h3>Hourly dose pattern</h3></div>
+        <div style="padding:1.25rem;overflow-x:auto">
+          <div id="hourlyChart" style="display:flex;align-items:flex-end;gap:4px;height:80px;min-width:600px"></div>
+          <div style="display:flex;gap:4px;min-width:600px;margin-top:4px" id="hourlyLabels"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Day of week pattern</h3></div>
+        <div style="padding:1.25rem">
+          <div id="dowChart" style="display:flex;align-items:flex-end;gap:12px;height:60px"></div>
+          <div id="dowLabels" style="display:flex;gap:12px;margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="section" id="sec-security">
       <div class="topbar"><h2>Security</h2><button class="btn-sm" onclick="loadSecurity()">↻ Refresh</button></div>
       <div class="card">
@@ -408,6 +441,7 @@ function showSection(id, el) {
   if (id === 'revenue') loadRevenue();
   if (id === 'users') loadUsers();
   if (id === 'security') loadSecurity();
+  if (id === 'analytics') loadAnalytics();
 }
 
 function logout() {
@@ -416,6 +450,65 @@ function logout() {
   document.getElementById('login').style.display = 'flex';
   document.getElementById('userPill').style.display = 'none';
   if (window.google) google.accounts.id.disableAutoSelect();
+}
+
+async function loadAnalytics() {
+  try {
+    const data = await api('/admin/analytics/doses');
+    const o = data.dose_outcomes || {};
+    const total = (o.taken||0) + (o.missed||0) + (o.skipped||0);
+    document.getElementById('doseKpis').innerHTML = `
+      <div class="kpi"><div class="kpi-label">Doses taken (30d)</div><div class="kpi-val" style="color:var(--gr)">${(o.taken||0).toLocaleString()}</div></div>
+      <div class="kpi"><div class="kpi-label">Doses missed</div><div class="kpi-val" style="color:var(--rd)">${(o.missed||0).toLocaleString()}</div></div>
+      <div class="kpi"><div class="kpi-label">Doses skipped</div><div class="kpi-val" style="color:var(--yw)">${(o.skipped||0).toLocaleString()}</div></div>
+      <div class="kpi"><div class="kpi-label">Adherence rate</div><div class="kpi-val">${total>0?Math.round((o.taken||0)/total*100):0}%</div></div>`;
+
+    document.getElementById('outcomeRows').innerHTML = [
+      {label:'Taken', val:o.taken||0, color:'var(--gr)'},
+      {label:'Missed', val:o.missed||0, color:'var(--rd)'},
+      {label:'Skipped', val:o.skipped||0, color:'var(--yw)'},
+    ].map(r => `<div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--tm);width:50px">${r.label}</span>
+      <div style="flex:1;background:var(--sf2);border-radius:4px;height:8px">
+        <div style="width:${total>0?Math.round(r.val/total*100):0}%;background:${r.color};height:8px;border-radius:4px"></div>
+      </div>
+      <span style="font-size:12px;font-weight:700;color:${r.color};width:40px;text-align:right">${r.val}</span>
+    </div>`).join('');
+
+    const meds = data.top_medications || [];
+    document.getElementById('medAnalyticsTable').innerHTML = meds.length
+      ? meds.map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.name}</td><td>${m.doses_taken}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">No dose data yet</td></tr>';
+
+    // Hourly bar chart
+    const hourly = data.hourly_pattern || [];
+    const maxH = Math.max(...hourly.map(h=>h.doses), 1);
+    const hourlyEl = document.getElementById('hourlyChart');
+    const hourlyLbl = document.getElementById('hourlyLabels');
+    hourlyEl.innerHTML = Array.from({length:24},(_,i)=>{
+      const h = hourly.find(x=>x.hour===`${i}:00`);
+      const pct = h ? Math.round(h.doses/maxH*100) : 2;
+      return `<div title="${i}:00 — ${h?.doses||0} doses" style="flex:1;background:${pct>20?'var(--ac)':'var(--sf2)'};height:${Math.max(pct,2)}%;border-radius:2px 2px 0 0;min-height:2px"></div>`;
+    }).join('');
+    hourlyLbl.innerHTML = Array.from({length:24},(_,i)=>
+      `<span style="flex:1;font-size:9px;color:var(--tm);text-align:center">${i%6===0?i+':00':''}</span>`
+    ).join('');
+
+    // Day of week chart
+    const dow = data.day_of_week || [];
+    const maxD = Math.max(...dow.map(d=>d.count), 1);
+    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    document.getElementById('dowChart').innerHTML = days.map(day=>{
+      const d = dow.find(x=>x.day===day);
+      const pct = d ? Math.round(d.count/maxD*100) : 2;
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+        <div style="width:100%;background:var(--ac);height:${Math.max(pct,2)}%;border-radius:3px 3px 0 0;opacity:${pct>50?1:0.5}"></div>
+      </div>`;
+    }).join('');
+    document.getElementById('dowLabels').innerHTML = days.map(d=>
+      `<span style="flex:1;font-size:10px;color:var(--tm);text-align:center">${d}</span>`
+    ).join('');
+  } catch(e) { console.error('Analytics error:', e); }
 }
 
 async function loadSecurity() {
