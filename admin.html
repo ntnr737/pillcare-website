@@ -257,12 +257,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div><label>Expires in days (0 = never)</label><input type="number" id="modalDays" value="30" min="0"></div>
     <div><label>Admin note</label><input type="text" id="modalNote" placeholder="e.g. Trial granted"></div>
     <div style="border-top:1px solid var(--bd);padding-top:1rem">
-      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Feature overrides</label>
-      <div class="feature-row"><span style="font-size:13px">Unlimited medications</span><button class="toggle off" id="ft-meds" onclick="toggleFt('max_medications',this,999,3)"></button></div>
-      <div class="feature-row"><span style="font-size:13px">Full yoga routines</span><button class="toggle off" id="ft-yoga" onclick="toggleFt('yoga_full',this,true,false)"></button></div>
-      <div class="feature-row"><span style="font-size:13px">Daily AI insights</span><button class="toggle off" id="ft-ai" onclick="toggleFt('ai_insights',this,'daily','weekly')"></button></div>
-      <div class="feature-row"><span style="font-size:13px">Data export</span><button class="toggle off" id="ft-export" onclick="toggleFt('export_data',this,true,false)"></button></div>
-      <div class="feature-row"><span style="font-size:13px">Ad-free</span><button class="toggle off" id="ft-ads" onclick="toggleFt('ads_free',this,true,false)"></button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label style="font-size:13px;font-weight:600">Feature overrides</label>
+        <span style="font-size:10px;color:var(--tm)">Overrides plan defaults</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Unlimited medications</span><br><span style="font-size:10px;color:var(--tm)">Free: 3 max · Today screen</span></div><button class="toggle off" id="ft-meds" onclick="toggleFt('max_medications',this,999,3)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Full yoga routines</span><br><span style="font-size:10px;color:var(--tm)">Free: basic · Treatment tab</span></div><button class="toggle off" id="ft-yoga" onclick="toggleFt('yoga_full',this,true,false)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Daily AI insights</span><br><span style="font-size:10px;color:var(--tm)">Free: weekly · Progress screen</span></div><button class="toggle off" id="ft-ai" onclick="toggleFt('ai_insights',this,'daily','weekly')"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">90-day history</span><br><span style="font-size:10px;color:var(--tm)">Free: 7 days · Progress screen</span></div><button class="toggle off" id="ft-history" onclick="toggleFt('history_days',this,90,7)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">CSV data export</span><br><span style="font-size:10px;color:var(--tm)">Free: no · History screen</span></div><button class="toggle off" id="ft-export" onclick="toggleFt('export_data',this,true,false)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Caregiver alerts</span><br><span style="font-size:10px;color:var(--tm)">Free: 1 · Support screen</span></div><button class="toggle off" id="ft-caregiver" onclick="toggleFt('caregiver_alerts',this,999,1)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">20 nearby results</span><br><span style="font-size:10px;color:var(--tm)">Free: 5 · Nearby screen</span></div><button class="toggle off" id="ft-nearby" onclick="toggleFt('nearby_results',this,20,5)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Brand vs generic lookup</span><br><span style="font-size:10px;color:var(--tm)">Free: no · Medications tab</span></div><button class="toggle off" id="ft-brand" onclick="toggleFt('brand_generic',this,true,false)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Medicine scanner</span><br><span style="font-size:10px;color:var(--tm)">Free: no · Add medication</span></div><button class="toggle off" id="ft-scan" onclick="toggleFt('scanner',this,true,false)"></button></div>
+        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Doctor appointments</span><br><span style="font-size:10px;color:var(--tm)">Free: 3 max · Appointments</span></div><button class="toggle off" id="ft-appt" onclick="toggleFt('max_appointments',this,999,3)"></button></div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-sm" onclick="closeModal()">Cancel</button>
