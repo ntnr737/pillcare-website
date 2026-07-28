@@ -23,19 +23,14 @@ nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-f
 .search-box{display:flex;gap:0;max-width:480px;margin:0 auto;border:1.5px solid var(--bd);border-radius:12px;overflow:hidden;background:#fff}
 .search-box input{flex:1;padding:12px 16px;border:none;outline:none;font-size:14px;background:transparent}
 .search-box button{padding:10px 20px;background:var(--tx);color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer}
-.container{max-width:860px;margin:0 auto;padding:3rem 2rem 5rem;display:grid;grid-template-columns:220px 1fr;gap:3rem;align-items:start}
-@media(max-width:700px){.container{grid-template-columns:1fr}.sidebar-nav{display:none}}
-.sidebar-nav{position:sticky;top:80px}
-.sidebar-nav h3{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);margin-bottom:1rem}
-.sidebar-nav a{display:block;padding:6px 10px;border-radius:8px;font-size:13px;color:var(--tm);margin-bottom:2px;transition:.15s}
-.sidebar-nav a:hover,.sidebar-nav a.active{background:var(--ac-light);color:var(--ac);text-decoration:none}
-.faq-content{}
+.container{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+.sidebar-nav{display:none!important}.faq-content{}
 .category{margin-bottom:3rem}
 .category h2{font-size:1.2rem;font-weight:700;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:2px solid var(--bd);display:flex;align-items:center;gap:10px}
 .category h2 .icon{font-size:1.1em}
 .faq-item{border:1px solid var(--bd);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:.15s}
 .faq-item:hover{border-color:var(--ac)}
-.faq-q{width:100%;background:none;border:none;padding:1rem 1.25rem;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:14px;font-weight:600;color:var(--tx);line-height:1.5}
+.faq-q{width:100%;background:none;border:none;padding:.9rem 1.1rem;text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:1rem;font-size:14px;font-weight:600;color:var(--tx);line-height:1.5}
 .faq-q .arrow{font-size:12px;color:var(--tm);transition:.2s;flex-shrink:0}
 .faq-item.open .faq-q .arrow{transform:rotate(180deg);color:var(--ac)}
 .faq-item.open .faq-q{color:var(--ac)}
