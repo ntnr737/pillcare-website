@@ -5,682 +5,690 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PillCare Admin</title>
 <script src="https://accounts.google.com/gsi/client"></script>
-<script>
-window.handleGoogleLogin = async function(response) {
-  try {
-    const r = await fetch("https://pillcare-backend-1082668880575.europe-west1.run.app/admin/auth/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id_token: response.credential })
-    });
-    const data = await r.json();
-    if (!r.ok) { document.getElementById("loginErr").style.display="block"; document.getElementById("loginErr").textContent=data.detail||"Access denied"; return; }
-    TOKEN = data.token;
-    showApp(data.name, data.picture);
-  } catch(e) { document.getElementById("loginErr").style.display="block"; document.getElementById("loginErr").textContent="Connection error"; }
-};
-
-window.addEventListener('load', function() {
-  function tryRender() {
-    if (!window.google || !google.accounts) { setTimeout(tryRender, 200); return; }
-    google.accounts.id.initialize({
-      client_id: "1082668880575-lfoqgnieodb52b5ges1vppiv92ifbioc.apps.googleusercontent.com",
-      callback: handleGoogleLogin,
-      auto_select: false,
-    });
-    const container = document.getElementById('googleBtnContainer');
-    if (container) {
-      container.innerHTML = '';
-      google.accounts.id.renderButton(container, {
-        type: 'standard',
-        theme: 'filled_black',
-        size: 'large',
-        text: 'signin_with',
-        width: 320,
-      });
-    }
-  }
-  tryRender();
-});
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1117;--sf:#1a1d27;--sf2:#22263a;--ac:#9184d9;--ac2:#a7a1db;--tx:#e9e9ed;--tm:rgba(233,233,237,.55);--bd:rgba(233,233,237,.1);--gr:#4ade80;--rd:#f87171;--yw:#fbbf24}
-body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh}
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh}
-.login-box{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:2.5rem;width:380px;display:flex;flex-direction:column;align-items:center;gap:1.25rem;text-align:center}
-.login-icon{font-size:40px;margin-bottom:.25rem}
+:root{--bg:#0f1117;--sf:#1a1d27;--sf2:#22263a;--ac:#9184d9;--ac2:#a7a1db;--tx:#e9e9ed;--tm:rgba(233,233,237,.55);--bd:rgba(233,233,237,.1);--gr:#4ade80;--rd:#f87171;--yw:#fbbf24;--pk:#f472b6}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;font-size:14px}
+/* Login */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-box{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:2.5rem;width:360px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.25rem}
 .login-box h1{font-size:20px;font-weight:700}
 .login-box p{font-size:13px;color:var(--tm);line-height:1.6}
-.google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;background:#fff;color:#1f1f1f;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
-.google-btn:hover{background:#f0f0f0}
-.google-btn svg{width:18px;height:18px;flex-shrink:0}
-
-.err{color:var(--rd);font-size:12px}
-#app{display:none;flex-direction:column;min-height:100vh}
-.sidebar{width:220px;background:var(--sf);border-right:1px solid var(--bd);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;padding:1.5rem 1rem;gap:.5rem}
-.logo{font-size:15px;font-weight:700;padding:.5rem;margin-bottom:.5rem}
+#gBtn{min-height:44px;display:flex;align-items:center;justify-content:center;width:100%}
+.err{color:var(--rd);font-size:12px;display:none}
+/* Layout */
+#appPage{display:none;min-height:100vh}
+.sidebar{width:200px;background:var(--sf);border-right:1px solid var(--bd);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;padding:1rem;gap:4px;overflow-y:auto}
+.logo{font-size:15px;font-weight:700;padding:8px;margin-bottom:8px;color:var(--tx)}
 .logo span{color:var(--ac)}
-.user-pill{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border-radius:10px;margin-bottom:.5rem}
-.user-pill img{width:26px;height:26px;border-radius:50%;object-fit:cover}
-.user-pill-name{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav-item{padding:8px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:var(--tm);display:flex;align-items:center;gap:8px;transition:.15s;border:none;background:none;width:100%;text-align:left}
-.nav-item:hover{background:var(--sf2);color:var(--tx)}
-.nav-item.active{background:rgba(145,132,217,.15);color:var(--ac)}
-.nav-sep{height:1px;background:var(--bd);margin:.5rem 0}
-.main{margin-left:220px;padding:2rem;flex:1}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
-.topbar h2{font-size:20px;font-weight:600}
+.user-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border-radius:10px;margin-bottom:8px}
+.user-chip img{width:24px;height:24px;border-radius:50%}
+.user-chip span{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav{padding:8px 10px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--tm);display:flex;align-items:center;gap:8px;border:none;background:none;width:100%;text-align:left;transition:.15s}
+.nav:hover{background:var(--sf2);color:var(--tx)}
+.nav.on{background:rgba(145,132,217,.15);color:var(--ac)}
+.sep{height:1px;background:var(--bd);margin:6px 0}
+.main{margin-left:200px;padding:1.5rem;min-height:100vh}
+/* Common */
+.page{display:none}.page.on{display:block}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.topbar h2{font-size:18px;font-weight:700}
+.btns{display:flex;gap:8px;align-items:center}
 .badge-live{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:rgba(74,222,128,.15);color:var(--gr)}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
-.kpi{background:var(--sf);border-radius:14px;padding:1.25rem;border:1px solid var(--bd)}
-.kpi-label{font-size:11px;color:var(--tm);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
-.kpi-val{font-size:28px;font-weight:700;line-height:1}
-.kpi-sub{font-size:11px;color:var(--tm);margin-top:4px}
-.kpi-sub.up{color:var(--gr)}
-.card{background:var(--sf);border-radius:14px;border:1px solid var(--bd);margin-bottom:1.5rem}
-.card-header{padding:1rem 1.25rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
-.card-header h3{font-size:14px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:var(--sf);border-radius:12px;padding:1.1rem;border:1px solid var(--bd)}
+.kpi-l{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.kpi-v{font-size:26px;font-weight:700;line-height:1}
+.kpi-s{font-size:11px;color:var(--tm);margin-top:3px}
+.kpi-s.up{color:var(--gr)}.kpi-s.dn{color:var(--rd)}
+.card{background:var(--sf);border-radius:12px;border:1px solid var(--bd);margin-bottom:1rem}
+.card-h{padding:.9rem 1.1rem;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.card-h h3{font-size:13px;font-weight:600}
+.card-b{padding:1rem 1.1rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bd)}
-td{padding:12px 16px;border-bottom:1px solid var(--bd)}
+th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--tm);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bd)}
+td{padding:11px 14px;border-bottom:1px solid var(--bd)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,.02)}
-.search{padding:8px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;color:var(--tx);font-size:13px;width:240px;outline:none}
-.btn-sm{padding:5px 12px;font-size:12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);cursor:pointer}
-.btn-sm:hover{border-color:var(--ac);color:var(--ac)}
-.btn-sm.active-filter{background:rgba(145,132,217,.15);border-color:var(--ac);color:var(--ac)}
-.badge{padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600}
-.badge-free{background:var(--sf2);color:var(--tm)}
-.badge-premium{background:rgba(145,132,217,.2);color:var(--ac)}
-.badge-enterprise{background:rgba(251,191,36,.15);color:var(--yw)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:1.5rem;width:480px;display:flex;flex-direction:column;gap:1rem;max-height:90vh;overflow-y:auto}
-.modal h3{font-size:16px;font-weight:600}
-.modal label{font-size:12px;color:var(--tm);display:block;margin-bottom:4px}
-.modal select,.modal input{width:100%;padding:10px 14px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;color:var(--tx);font-size:14px;outline:none}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end}
-.btn-primary{padding:10px 20px;border-radius:10px;border:none;cursor:pointer;background:var(--ac);color:#fff;font-size:14px;font-weight:600}
-.section{display:none}
-.section.active{display:block}
-.feature-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--sf2);border-radius:10px;margin-bottom:6px}
-.toggle{width:40px;height:22px;border-radius:999px;border:none;cursor:pointer;transition:.2s}
-.toggle.on{background:var(--ac)}
-.toggle.off{background:var(--bd)}
-.empty{text-align:center;padding:3rem;color:var(--tm);font-size:13px}
+.empty{text-align:center;padding:2.5rem;color:var(--tm);font-size:13px}
+.btn{padding:7px 14px;border-radius:9px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
+.btn:hover{border-color:var(--ac);color:var(--ac)}
+.btn.primary{background:var(--ac);border-color:var(--ac);color:#fff}
+.btn.primary:hover{background:var(--ac2)}
+.btn.green{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:var(--gr)}
+.btn.red{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3);color:var(--rd)}
+.pill{padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.pill-free{background:var(--sf2);color:var(--tm)}
+.pill-premium{background:rgba(145,132,217,.2);color:var(--ac)}
+.pill-enterprise{background:rgba(251,191,36,.15);color:var(--yw)}
+/* Bar */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-lbl{font-size:12px;color:var(--tm);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:7px;background:var(--sf2);border-radius:4px}
+.bar-fill{height:7px;border-radius:4px;transition:.3s}
+.bar-val{font-size:11px;font-weight:700;color:var(--tx);width:28px;text-align:right}
+/* Chart */
+.bar-chart{display:flex;align-items:flex-end;gap:3px;height:70px}
+.bar-chart .b{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:.3s;cursor:default}
+.chart-labels{display:flex;gap:3px;margin-top:3px}
+.chart-labels span{flex:1;font-size:9px;color:var(--tm);text-align:center}
+/* Toggle */
+.toggle{width:38px;height:20px;border-radius:999px;border:none;cursor:pointer;transition:.2s;position:relative;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:var(--ac)}.toggle.on::after{left:20px}
+.toggle.off{background:rgba(233,233,237,.2)}
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--sf);border:1px solid var(--bd);border-radius:16px;padding:1.5rem;width:500px;max-height:88vh;overflow-y:auto;display:flex;flex-direction:column;gap:1rem}
+.modal h3{font-size:16px;font-weight:700}
+.modal label{font-size:11px;color:var(--tm);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.modal select,.modal input[type=text],.modal input[type=number]{width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none}
+.ft-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ft-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;background:var(--sf2);border-radius:9px;gap:8px}
+.ft-info{flex:1;min-width:0}
+.ft-name{font-size:12px;font-weight:600;color:var(--tx)}
+.ft-desc{font-size:10px;color:var(--tm);margin-top:1px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none}
 </style>
 </head>
 <body>
 
-<div id="login">
+<!-- LOGIN -->
+<div id="loginPage">
   <div class="login-box">
-    <div class="login-icon">💊</div>
+    <div style="font-size:36px">💊</div>
     <h1>PillCare Admin</h1>
-    <p>Restricted access — sign in with your authorised Google account to continue.</p>
-    <div id="googleBtnContainer" style="min-height:44px;display:flex;align-items:center;justify-content:center">
-      <span style="font-size:12px;color:var(--tm)">Loading...</span>
-    </div>
-
-    <p class="err" id="loginErr" style="display:none">Access denied. Try again.</p>
+    <p>Sign in with your authorised Google account to access the dashboard.</p>
+    <div id="gBtn"><span style="font-size:12px;color:var(--tm)">Loading...</span></div>
+    <p class="err" id="loginErr">Access denied. This account is not authorised.</p>
   </div>
 </div>
 
-<div id="app">
+<!-- APP -->
+<div id="appPage">
   <div class="sidebar">
-    <div class="logo">Pill<span>Care</span> Admin</div>
-    <div class="user-pill" id="userPill" style="display:none">
+    <div class="logo">Pill<span>Care</span></div>
+    <div class="user-chip" id="userChip" style="display:none">
       <img id="userPic" src="" alt="">
-      <span class="user-pill-name" id="userName"></span>
+      <span id="userName"></span>
     </div>
-    <button class="nav-item active" onclick="showSection('dashboard',this)">📊 Dashboard</button>
-    <button class="nav-item" onclick="showSection('users',this)">👥 Users</button>
-    <button class="nav-item" onclick="showSection('subscriptions',this)">💳 Subscriptions</button>
-    <button class="nav-item" onclick="showSection('revenue',this)">💰 Revenue</button>
-    <div class="nav-sep"></div>
-    <button class="nav-item" onclick="showSection('analytics',this)">📈 Analytics</button>
-    <button class="nav-item" onclick="showSection('location',this)">🗺️ Location</button>
-    <button class="nav-item" onclick="showSection('devices',this)">📱 Devices</button>
-    <button class="nav-item" onclick="showSection('security',this)">🛡️ Security</button>
-    <div class="nav-sep"></div>
-    <button class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Sign out</button>
+    <button class="nav on" onclick="go('dashboard',this)">📊 Dashboard</button>
+    <button class="nav" onclick="go('analytics',this)">📈 Analytics</button>
+    <button class="nav" onclick="go('users',this)">👥 Users</button>
+    <button class="nav" onclick="go('subscriptions',this)">💳 Subscriptions</button>
+    <button class="nav" onclick="go('location',this)">🗺️ Location</button>
+    <button class="nav" onclick="go('devices',this)">📱 Devices</button>
+    <button class="nav" onclick="go('revenue',this)">💰 Revenue</button>
+    <button class="nav" onclick="go('security',this)">🛡️ Security</button>
+    <div class="sep"></div>
+    <button class="nav" onclick="logout()" style="margin-top:auto;color:var(--rd)">🚪 Sign out</button>
   </div>
 
   <div class="main">
-    <div class="section active" id="sec-dashboard">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="pg-dashboard">
       <div class="topbar">
         <h2>Dashboard</h2>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div class="btns">
           <span class="badge-live">● Live</span>
-          <button class="btn-sm" onclick="exportExcel()" style="background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.3);color:var(--gr)">⬇ Export Excel</button>
+          <button class="btn green" onclick="exportExcel()">⬇ Export Excel</button>
+          <button class="btn" onclick="loadAll()">↻ Refresh</button>
         </div>
       </div>
       <div class="kpis">
-        <div class="kpi"><div class="kpi-label">Total users</div><div class="kpi-val" id="k1">—</div><div class="kpi-sub up" id="k1s"></div></div>
-        <div class="kpi"><div class="kpi-label">Premium users</div><div class="kpi-val" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
-        <div class="kpi"><div class="kpi-label">Global adherence</div><div class="kpi-val" id="k3">—</div><div class="kpi-sub" id="k3s"></div></div>
-        <div class="kpi"><div class="kpi-label">Est. MRR</div><div class="kpi-val" id="k4">—</div><div class="kpi-sub up" id="k4s"></div></div>
+        <div class="kpi"><div class="kpi-l">Total users</div><div class="kpi-v" id="k-users">—</div><div class="kpi-s up" id="k-users-s"></div></div>
+        <div class="kpi"><div class="kpi-l">Active this week</div><div class="kpi-v" id="k-active">—</div><div class="kpi-s" id="k-active-s"></div></div>
+        <div class="kpi"><div class="kpi-l">Global adherence</div><div class="kpi-v" id="k-adh">—</div><div class="kpi-s" id="k-adh-s"></div></div>
+        <div class="kpi"><div class="kpi-l">Est. MRR</div><div class="kpi-v" id="k-mrr">—</div><div class="kpi-s up" id="k-mrr-s"></div></div>
       </div>
-      <div class="card">
-        <div class="card-header"><h3>Top medications</h3></div>
-        <table><thead><tr><th>#</th><th>Medication</th><th>Users tracking</th></tr></thead><tbody id="medTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
-      </div>
-      <div class="card">
-        <div class="card-header"><h3>Feature usage</h3></div>
-        <table><thead><tr><th>Feature</th><th>Uses</th></tr></thead><tbody id="featTable"><tr><td colspan="2" class="empty">Loading...</td></tr></tbody></table>
-      </div>
-    </div>
-
-    <div class="section" id="sec-users">
-      <div class="topbar"><h2>Users</h2><input class="search" placeholder="Search name or email..." oninput="filterUsers(this.value)"></div>
-      <div class="card">
-        <table><thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Meds</th><th>Plan</th><th>Last login</th><th>Actions</th></tr></thead><tbody id="userTable"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table>
-      </div>
-    </div>
-
-    <div class="section" id="sec-subscriptions">
-      <div class="topbar"><h2>Subscriptions</h2></div>
-      <div class="card">
-        <div class="card-header"><h3>All subscriptions</h3>
-          <div style="display:flex;gap:8px">
-            <button class="btn-sm active-filter" onclick="loadSubs('',this)">All</button>
-            <button class="btn-sm" onclick="loadSubs('free',this)">Free</button>
-            <button class="btn-sm" onclick="loadSubs('premium',this)">Premium</button>
-          </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><h3>Top medications</h3></div>
+          <table><thead><tr><th>#</th><th>Medication</th><th>Users</th></tr></thead>
+          <tbody id="dash-meds"></tbody></table>
         </div>
-        <table><thead><tr><th>User</th><th>Plan</th><th>Status</th><th>Expires</th><th>Overrides</th><th>Actions</th></tr></thead><tbody id="subTable"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+        <div class="card">
+          <div class="card-h"><h3>Feature usage</h3></div>
+          <div class="card-b" id="dash-features"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Daily signups — last 30 days</h3></div>
+        <div class="card-b">
+          <div class="bar-chart" id="signup-chart"></div>
+          <div class="chart-labels" id="signup-labels"></div>
+        </div>
       </div>
     </div>
 
-    <div class="section" id="sec-revenue">
-      <div class="topbar"><h2>Revenue</h2></div>
-      <div class="kpis" id="revKpis"></div>
+    <!-- ANALYTICS -->
+    <div class="page" id="pg-analytics">
+      <div class="topbar"><h2>Dose Analytics</h2><button class="btn" onclick="loadAnalytics()">↻ Refresh</button></div>
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-l">Doses taken (30d)</div><div class="kpi-v" style="color:var(--gr)" id="a-taken">—</div></div>
+        <div class="kpi"><div class="kpi-l">Doses missed</div><div class="kpi-v" style="color:var(--rd)" id="a-missed">—</div></div>
+        <div class="kpi"><div class="kpi-l">Doses skipped</div><div class="kpi-v" style="color:var(--yw)" id="a-skipped">—</div></div>
+        <div class="kpi"><div class="kpi-l">Adherence rate</div><div class="kpi-v" id="a-rate">—</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><h3>Outcome breakdown</h3></div>
+          <div class="card-b" id="a-outcomes"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Top medications taken</h3></div>
+          <table><thead><tr><th>#</th><th>Medication</th><th>Doses</th></tr></thead>
+          <tbody id="a-topmeds"></tbody></table>
+        </div>
+      </div>
       <div class="card">
-        <div class="card-header"><h3>Pricing tiers</h3></div>
-        <table><thead><tr><th>Plan</th><th>Users</th><th>Price</th><th>MRR</th></tr></thead>
-        <tbody><tr><td><span class="badge badge-free">Free</span></td><td id="r-free">—</td><td>₹0</td><td>₹0</td></tr>
-        <tr><td><span class="badge badge-premium">Premium</span></td><td id="r-prem">—</td><td>₹99/mo</td><td id="r-prem-mrr">—</td></tr>
-        <tr><td><span class="badge badge-enterprise">Enterprise</span></td><td id="r-ent">—</td><td>Custom</td><td>—</td></tr></tbody>
+        <div class="card-h"><h3>Hourly dose pattern — what time do people take medicine?</h3></div>
+        <div class="card-b">
+          <div class="bar-chart" id="hourly-chart" style="height:90px"></div>
+          <div class="chart-labels" id="hourly-labels"></div>
+          <div style="font-size:10px;color:var(--tm);margin-top:8px;text-align:center">Hour of day (24h) — hover for count</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Day of week pattern — which days have best adherence?</h3></div>
+        <div class="card-b">
+          <div class="bar-chart" id="dow-chart" style="height:70px;gap:10px"></div>
+          <div class="chart-labels" id="dow-labels" style="gap:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="pg-users">
+      <div class="topbar">
+        <h2>Users</h2>
+        <input type="search" placeholder="Search name or email..." oninput="filterUsers(this.value)">
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Location</th><th>Meds</th><th>Adherence</th><th>Plan</th><th>Last login</th><th>Action</th></tr></thead>
+          <tbody id="user-table"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
         </table>
       </div>
     </div>
-    <div class="section" id="sec-analytics">
-      <div class="topbar"><h2>Analytics</h2><button class="btn-sm" onclick="loadAnalytics()">↻ Refresh</button></div>
-      <div class="kpis" id="doseKpis"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Dose outcomes (30 days)</h3></div>
-          <div style="padding:1.25rem">
-            <div style="display:flex;flex-direction:column;gap:8px" id="outcomeRows"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Top medications</h3></div>
-          <table><thead><tr><th>#</th><th>Medication</th><th>Doses taken</th></tr></thead>
-          <tbody id="medAnalyticsTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
-        </div>
-      </div>
-      <div class="card" style="margin-bottom:1.5rem">
-        <div class="card-header"><h3>Hourly dose pattern</h3></div>
-        <div style="padding:1.25rem;overflow-x:auto">
-          <div id="hourlyChart" style="display:flex;align-items:flex-end;gap:4px;height:80px;min-width:600px"></div>
-          <div style="display:flex;gap:4px;min-width:600px;margin-top:4px" id="hourlyLabels"></div>
+
+    <!-- SUBSCRIPTIONS -->
+    <div class="page" id="pg-subscriptions">
+      <div class="topbar">
+        <h2>Subscriptions</h2>
+        <div class="btns">
+          <button class="btn" onclick="loadSubs('')">All</button>
+          <button class="btn" onclick="loadSubs('free')">Free</button>
+          <button class="btn" onclick="loadSubs('premium')">Premium</button>
+          <button class="btn" onclick="loadSubs('enterprise')">Enterprise</button>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><h3>Day of week pattern</h3></div>
-        <div style="padding:1.25rem">
-          <div id="dowChart" style="display:flex;align-items:flex-end;gap:12px;height:60px"></div>
-          <div id="dowLabels" style="display:flex;gap:12px;margin-top:4px"></div>
-        </div>
+        <table>
+          <thead><tr><th>User</th><th>Plan</th><th>Status</th><th>Expires</th><th>Feature overrides</th><th>Action</th></tr></thead>
+          <tbody id="sub-table"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
-    <div class="section" id="sec-location">
-      <div class="topbar"><h2>Location & Demographics</h2><button class="btn-sm" onclick="loadLocation()">↻ Refresh</button></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
+    <!-- LOCATION -->
+    <div class="page" id="pg-location">
+      <div class="topbar"><h2>Location & Demographics</h2><button class="btn" onclick="loadLocation()">↻ Refresh</button></div>
+      <div class="g2" style="margin-bottom:1rem">
         <div class="card">
-          <div class="card-header"><h3>Top states</h3></div>
+          <div class="card-h"><h3>Top states</h3></div>
           <table><thead><tr><th>#</th><th>State</th><th>Users</th></tr></thead>
-          <tbody id="stateTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
+          <tbody id="state-table"></tbody></table>
         </div>
         <div class="card">
-          <div class="card-header"><h3>Top cities</h3></div>
+          <div class="card-h"><h3>Top cities</h3></div>
           <table><thead><tr><th>#</th><th>City</th><th>State</th><th>Users</th></tr></thead>
-          <tbody id="cityTable"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+          <tbody id="city-table"></tbody></table>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="g2">
         <div class="card">
-          <div class="card-header"><h3>Age brackets</h3></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="ageBrackets"></div>
+          <div class="card-h"><h3>Age brackets</h3></div>
+          <div class="card-b" id="age-bars"></div>
         </div>
         <div class="card">
-          <div class="card-header"><h3>Gender split</h3></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="genderSplit"></div>
+          <div class="card-h"><h3>Gender split</h3></div>
+          <div class="card-b" id="gender-bars"></div>
         </div>
       </div>
     </div>
 
-    <div class="section" id="sec-devices">
-      <div class="topbar"><h2>Devices & App Versions</h2><button class="btn-sm" onclick="loadDevices()">↻ Refresh</button></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
-        <div class="card">
-          <div class="card-header"><h3>Device brands</h3></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="brandBars"></div>
-        </div>
-        <div class="card">
-          <div class="card-header"><h3>Android OS versions</h3></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="osBars"></div>
-        </div>
+    <!-- DEVICES -->
+    <div class="page" id="pg-devices">
+      <div class="topbar"><h2>Devices & App Versions</h2><button class="btn" onclick="loadDevices()">↻ Refresh</button></div>
+      <div style="font-size:12px;color:var(--yw);background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:9px;padding:10px 14px;margin-bottom:1rem">
+        ⚠ Device data starts collecting from the August 1st build onwards. Data below will be empty until the new app version is installed.
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="g2" style="margin-bottom:1rem">
+        <div class="card"><div class="card-h"><h3>Device brands</h3></div><div class="card-b" id="brand-bars"></div></div>
+        <div class="card"><div class="card-h"><h3>Android OS versions</h3></div><div class="card-b" id="os-bars"></div></div>
+      </div>
+      <div class="g2">
         <div class="card">
-          <div class="card-header"><h3>Device models</h3></div>
+          <div class="card-h"><h3>Device models</h3></div>
           <table><thead><tr><th>#</th><th>Model</th><th>Users</th></tr></thead>
-          <tbody id="modelTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
+          <tbody id="model-table"></tbody></table>
         </div>
-        <div class="card">
-          <div class="card-header"><h3>App versions in use</h3></div>
-          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="versionBars"></div>
-        </div>
+        <div class="card"><div class="card-h"><h3>App versions</h3></div><div class="card-b" id="ver-bars"></div></div>
       </div>
     </div>
 
-    <div class="section" id="sec-security">
-      <div class="topbar"><h2>Security</h2><button class="btn-sm" onclick="loadSecurity()">↻ Refresh</button></div>
-      <div class="card">
-        <div class="card-header"><h3>Failed login attempts — last 24h</h3></div>
-        <table><thead><tr><th>IP Address</th><th>Attempts</th><th>Last seen</th><th>Tried accounts</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="secTable"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+    <!-- REVENUE -->
+    <div class="page" id="pg-revenue">
+      <div class="topbar"><h2>Revenue</h2><button class="btn" onclick="loadRevenue()">↻ Refresh</button></div>
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-l">Paying users</div><div class="kpi-v" id="r-paying">—</div></div>
+        <div class="kpi"><div class="kpi-l">Conversion rate</div><div class="kpi-v" id="r-conv">—</div></div>
+        <div class="kpi"><div class="kpi-l">Est. MRR</div><div class="kpi-v" style="color:var(--gr)" id="r-mrr">—</div></div>
+        <div class="kpi"><div class="kpi-l">Est. ARR</div><div class="kpi-v" style="color:var(--gr)" id="r-arr">—</div></div>
       </div>
-      <div class="card" style="padding:1.25rem">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px">Your allowed IP (whitelist)</div>
-        <div style="font-size:12px;color:var(--tm);margin-bottom:8px">Add your IP to Cloudflare WAF to block everyone else from even reaching the admin page.</div>
-        <div style="display:flex;gap:8px;align-items:center">
+      <div class="card">
+        <div class="card-h"><h3>Plan breakdown</h3></div>
+        <table>
+          <thead><tr><th>Plan</th><th>Users</th><th>Price</th><th>Monthly revenue</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill pill-free">Free</span></td><td id="r-free">—</td><td>₹0</td><td>₹0</td></tr>
+            <tr><td><span class="pill pill-premium">Premium</span></td><td id="r-prem">—</td><td>₹99/mo</td><td id="r-prem-rev">—</td></tr>
+            <tr><td><span class="pill pill-enterprise">Enterprise</span></td><td id="r-ent">—</td><td>Custom</td><td>Custom</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SECURITY -->
+    <div class="page" id="pg-security">
+      <div class="topbar"><h2>Security</h2><button class="btn" onclick="loadSecurity()">↻ Refresh</button></div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Your IP address</h3></div>
+        <div class="card-b" style="display:flex;gap:10px;align-items:center">
           <code style="background:var(--sf2);padding:8px 14px;border-radius:8px;font-size:13px;flex:1" id="myIp">Detecting...</code>
-          <button class="btn-sm" onclick="copyIp()">Copy</button>
+          <button class="btn" onclick="navigator.clipboard.writeText(document.getElementById('myIp').textContent)">Copy</button>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Failed admin login attempts — last 24h</h3></div>
+        <table>
+          <thead><tr><th>IP Address</th><th>Attempts</th><th>Last seen</th><th>Tried emails</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="sec-table"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
   </div>
 </div>
 
-<div class="modal-overlay" id="userModal">
+<!-- MANAGE USER MODAL -->
+<div class="overlay" id="manageModal">
   <div class="modal">
-    <h3>Manage — <span id="modalUserName"></span></h3>
-    <div><label>Subscription plan</label>
-      <select id="modalPlan"><option value="free">Free</option><option value="premium">Premium</option><option value="enterprise">Enterprise</option></select>
+    <h3>Manage user — <span id="modal-name" style="color:var(--ac)"></span></h3>
+    <div>
+      <label>Subscription plan</label>
+      <select id="modal-plan">
+        <option value="free">Free — 3 medications, 7-day history</option>
+        <option value="premium">Premium — Unlimited everything (₹99/mo)</option>
+        <option value="enterprise">Enterprise — Custom pricing</option>
+      </select>
     </div>
-    <div><label>Expires in days (0 = never)</label><input type="number" id="modalDays" value="30" min="0"></div>
-    <div><label>Admin note</label><input type="text" id="modalNote" placeholder="e.g. Trial granted"></div>
+    <div>
+      <label>Plan expires in (days — 0 = never expires)</label>
+      <input type="number" id="modal-days" value="30" min="0">
+    </div>
+    <div>
+      <label>Admin note</label>
+      <input type="text" id="modal-note" placeholder="e.g. Trial granted, Investor access">
+    </div>
     <div style="border-top:1px solid var(--bd);padding-top:1rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <label style="font-size:13px;font-weight:600">Feature overrides</label>
-        <span style="font-size:10px;color:var(--tm)">Overrides plan defaults</span>
+        <label style="margin:0">Feature overrides (override plan defaults)</label>
+        <span style="font-size:10px;color:var(--tm)">Toggle to grant/revoke per user</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Unlimited medications</span><br><span style="font-size:10px;color:var(--tm)">Free: 3 max · Today screen</span></div><button class="toggle off" id="ft-meds" onclick="toggleFt('max_medications',this,999,3)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Full yoga routines</span><br><span style="font-size:10px;color:var(--tm)">Free: basic · Treatment tab</span></div><button class="toggle off" id="ft-yoga" onclick="toggleFt('yoga_full',this,true,false)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Daily AI insights</span><br><span style="font-size:10px;color:var(--tm)">Free: weekly · Progress screen</span></div><button class="toggle off" id="ft-ai" onclick="toggleFt('ai_insights',this,'daily','weekly')"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">90-day history</span><br><span style="font-size:10px;color:var(--tm)">Free: 7 days · Progress screen</span></div><button class="toggle off" id="ft-history" onclick="toggleFt('history_days',this,90,7)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">CSV data export</span><br><span style="font-size:10px;color:var(--tm)">Free: no · History screen</span></div><button class="toggle off" id="ft-export" onclick="toggleFt('export_data',this,true,false)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Caregiver alerts</span><br><span style="font-size:10px;color:var(--tm)">Free: 1 · Support screen</span></div><button class="toggle off" id="ft-caregiver" onclick="toggleFt('caregiver_alerts',this,999,1)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">20 nearby results</span><br><span style="font-size:10px;color:var(--tm)">Free: 5 · Nearby screen</span></div><button class="toggle off" id="ft-nearby" onclick="toggleFt('nearby_results',this,20,5)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Brand vs generic lookup</span><br><span style="font-size:10px;color:var(--tm)">Free: no · Medications tab</span></div><button class="toggle off" id="ft-brand" onclick="toggleFt('brand_generic',this,true,false)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Medicine scanner</span><br><span style="font-size:10px;color:var(--tm)">Free: no · Add medication</span></div><button class="toggle off" id="ft-scan" onclick="toggleFt('scanner',this,true,false)"></button></div>
-        <div class="feature-row"><div><span style="font-size:12px;font-weight:600">Doctor appointments</span><br><span style="font-size:10px;color:var(--tm)">Free: 3 max · Appointments</span></div><button class="toggle off" id="ft-appt" onclick="toggleFt('max_appointments',this,999,3)"></button></div>
-      </div>
+      <div class="ft-grid" id="ft-grid"></div>
     </div>
-    <div class="modal-actions">
-      <button class="btn-sm" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveSubscription()">Save changes</button>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveSub()">Save changes</button>
     </div>
+    <p style="font-size:12px;color:var(--rd);display:none" id="modal-err">Failed to save. Try again.</p>
   </div>
 </div>
 
 <script>
-const BACKEND = 'https://pillcare-backend-1082668880575.europe-west1.run.app';
-let TOKEN = '';
-let currentUserId = '';
-let allUsers = [];
+const B = 'https://pillcare-backend-1082668880575.europe-west1.run.app';
+const CID = '1082668880575-lfoqgnieodb52b5ges1vppiv92ifbioc.apps.googleusercontent.com';
+let TOKEN = '', allUsers = [], currentUid = '', userOverrides = {};
 
-async function handleGoogleLogin(response) {
+const FEATURES = [
+  {key:'max_medications', label:'Unlimited medications', desc:'Free: 3 max', onVal:999, offVal:3},
+  {key:'yoga_full', label:'Full yoga library', desc:'Free: basic only', onVal:true, offVal:false},
+  {key:'ai_insights', label:'Daily AI insights', desc:'Free: weekly', onVal:'daily', offVal:'weekly'},
+  {key:'history_days', label:'90-day history', desc:'Free: 7 days', onVal:90, offVal:7},
+  {key:'export_data', label:'CSV data export', desc:'Free: locked', onVal:true, offVal:false},
+  {key:'caregiver_alerts', label:'Unlimited caregivers', desc:'Free: 1 only', onVal:999, offVal:1},
+  {key:'nearby_results', label:'20 nearby results', desc:'Free: 5 only', onVal:20, offVal:5},
+  {key:'brand_generic', label:'Brand vs generic', desc:'Free: locked', onVal:true, offVal:false},
+  {key:'scanner', label:'Medicine scanner', desc:'Free: locked', onVal:true, offVal:false},
+  {key:'max_appointments', label:'Unlimited appointments', desc:'Free: 3 max', onVal:999, offVal:3},
+];
+
+// Google Sign-In
+window.addEventListener('load', () => {
+  function tryRender() {
+    if (!window.google) { setTimeout(tryRender, 200); return; }
+    google.accounts.id.initialize({ client_id: CID, callback: onGoogle, auto_select: false });
+    const c = document.getElementById('gBtn');
+    c.innerHTML = '';
+    google.accounts.id.renderButton(c, { type:'standard', theme:'filled_black', size:'large', text:'signin_with', width:300 });
+  }
+  tryRender();
+});
+
+async function onGoogle(resp) {
   try {
-    const r = await fetch(BACKEND + '/admin/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id_token: response.credential })
-    });
-    const data = await r.json();
-    if (!r.ok) { showErr(data.detail || 'Access denied'); return; }
-    TOKEN = data.token;
-    showApp(data.name, data.picture);
-  } catch { showErr('Connection error. Try again.'); }
+    const r = await fetch(B+'/admin/auth/google', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_token:resp.credential}) });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.detail||'Access denied'); return; }
+    TOKEN = d.token;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appPage').style.display = 'block';
+    const chip = document.getElementById('userChip');
+    chip.style.display = 'flex';
+    document.getElementById('userPic').src = d.picture||'';
+    document.getElementById('userName').textContent = d.name||d.email;
+    loadAll();
+  } catch { showErr('Connection error. Check your internet.'); }
 }
 
+function showErr(msg) { const e=document.getElementById('loginErr'); e.textContent=msg; e.style.display='block'; setTimeout(()=>e.style.display='none',5000); }
 
+function hdrs() { return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
 
-function showErr(msg) {
-  const e = document.getElementById('loginErr');
-  e.textContent = msg; e.style.display = 'block';
-  setTimeout(() => e.style.display = 'none', 4000);
-}
-
-function showApp(name, pic) {
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  if (name) { document.getElementById('userName').textContent = name; document.getElementById('userPill').style.display = 'flex'; }
-  if (pic) { document.getElementById('userPic').src = pic; }
-  loadDashboard();
-}
-
-function authHeaders() {
-  return { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
-}
-
-async function api(path, opts = {}) {
-  const r = await fetch(BACKEND + path, { ...opts, headers: { ...authHeaders(), ...(opts.headers || {}) } });
-  if (r.status === 401) { logout(); throw new Error('Session expired — please sign in again'); }
+async function req(path, opts={}) {
+  const r = await fetch(B+path, {...opts, headers:{...hdrs(),...(opts.headers||{})}});
+  if (r.status===401) { logout(); throw new Error('Session expired'); }
+  if (!r.ok) throw new Error('API error '+r.status);
   return r.json();
 }
 
-async function loadDashboard() {
+function go(id, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
+  document.getElementById('pg-'+id).classList.add('on');
+  el.classList.add('on');
+  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,security:loadSecurity};
+  if (loaders[id]) loaders[id]();
+}
+
+function logout() { TOKEN=''; document.getElementById('appPage').style.display='none'; document.getElementById('loginPage').style.display='flex'; if(window.google)google.accounts.id.disableAutoSelect(); }
+
+async function loadAll() {
   try {
-    const [stats, rev] = await Promise.all([api('/admin/stats'), api('/admin/revenue')]);
-    document.getElementById('k1').textContent = (stats.users?.total || 0).toLocaleString();
-    document.getElementById('k1s').textContent = '+' + (stats.users?.new_month || 0) + ' this month';
-    document.getElementById('k2').textContent = (rev.premium_users || 0).toLocaleString();
-    document.getElementById('k2s').textContent = (rev.conversion_rate || 0) + '% conversion';
-    document.getElementById('k3').textContent = (stats.health?.global_adherence_rate || 0) + '%';
-    document.getElementById('k3s').textContent = (stats.health?.taken || 0) + ' doses taken';
-    document.getElementById('k4').textContent = '₹' + (rev.mrr_estimate || 0).toLocaleString();
-    document.getElementById('k4s').textContent = rev.premium_users + ' paying users';
-    const meds = stats.top_medications || [];
-    document.getElementById('medTable').innerHTML = meds.length
-      ? meds.map((m,i) => `<tr><td style="color:var(--tm)">${i+1}</td><td>${m.name}</td><td>${m.users}</td></tr>`).join('')
-      : '<tr><td colspan="3" class="empty">No data yet — users need to add medications</td></tr>';
-    const fn = { yoga_viewed:'Yoga therapy', nearby_searched:'Nearby search', appointment_booked:'Appointments', caregiver_connected:'Caregiver' };
-    const feats = stats.feature_usage || [];
-    document.getElementById('featTable').innerHTML = feats.length
-      ? feats.map(f => `<tr><td>${fn[f.feature]||f.feature}</td><td>${f.count}</td></tr>`).join('')
-      : '<tr><td colspan="2" class="empty">No feature usage tracked yet</td></tr>';
-    await loadUsers();
-    await loadRevenue();
-  } catch(e) { console.error(e); }
-}
+    const [stats, rev] = await Promise.all([req('/admin/stats'), req('/admin/revenue')]);
+    document.getElementById('k-users').textContent = (stats.users?.total||0).toLocaleString();
+    document.getElementById('k-users-s').textContent = '+'+( stats.users?.new_month||0)+' this month';
+    document.getElementById('k-active').textContent = (stats.users?.active_week||0).toLocaleString();
+    document.getElementById('k-active-s').textContent = (stats.users?.retention_rate||0)+'% retention';
+    document.getElementById('k-adh').textContent = (stats.health?.global_adherence_rate||0)+'%';
+    document.getElementById('k-adh-s').textContent = (stats.health?.taken||0)+' doses taken';
+    const mrr = rev.mrr_estimate||0;
+    document.getElementById('k-mrr').textContent = '₹'+mrr.toLocaleString();
+    document.getElementById('k-mrr-s').textContent = (rev.premium_users||0)+' paying users';
 
-async function loadUsers() {
-  const data = await api('/admin/users?limit=100');
-  allUsers = data.users || [];
-  renderUsers(allUsers);
-}
+    const meds = stats.top_medications||[];
+    document.getElementById('dash-meds').innerHTML = meds.length
+      ? meds.slice(0,8).map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.name}</td><td>${m.users}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">No medications yet</td></tr>';
 
-function planBadge(p) {
-  const cls = { free:'badge-free', premium:'badge-premium', enterprise:'badge-enterprise' };
-  return `<span class="badge ${cls[p]||'badge-free'}">${p||'free'}</span>`;
-}
+    const fn={yoga_viewed:'🧘 Yoga',nearby_searched:'🗺 Nearby',appointment_booked:'📅 Appointments',caregiver_connected:'❤️ Caregiver'};
+    const feats=stats.feature_usage||[];
+    const maxF=Math.max(...feats.map(f=>f.count),1);
+    document.getElementById('dash-features').innerHTML = feats.length
+      ? feats.map(f=>`<div class="bar-row"><span class="bar-lbl">${fn[f.feature]||f.feature}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(f.count/maxF*100)}%;background:var(--ac)"></div></div><span class="bar-val">${f.count}</span></div>`).join('')
+      : '<div class="empty">No feature data yet</div>';
 
-function renderUsers(list) {
-  document.getElementById('userTable').innerHTML = list.length
-    ? list.map(u => `<tr>
-        <td><strong>${u.nickname||'—'}</strong></td>
-        <td style="color:var(--tm);font-size:12px">${u.email||''}</td>
-        <td style="font-size:12px;color:var(--tm)">${u.location||'—'}</td>
-        <td style="text-align:center">${u.medications||0}</td>
-        <td>${planBadge(u.plan||'free')}</td>
-        <td style="font-size:11px;color:var(--tm)">${u.last_login ? new Date(u.last_login).toLocaleDateString('en-IN') : '—'}</td>
-        <td><button class="btn-sm" onclick="openModal('${u.user_id}','${(u.nickname||'').replace(/'/g,'')}','${u.plan||'free'}')">Manage</button></td>
-      </tr>`).join('')
-    : '<tr><td colspan="7" class="empty">No users yet</td></tr>';
-}
-
-function filterUsers(q) {
-  const f = q.toLowerCase();
-  renderUsers(allUsers.filter(u => (u.nickname||'').toLowerCase().includes(f) || (u.email||'').toLowerCase().includes(f)));
-}
-
-async function loadSubs(plan, btn) {
-  document.querySelectorAll('.btn-sm').forEach(b => b.classList.remove('active-filter'));
-  if (btn) btn.classList.add('active-filter');
-  const data = await api('/admin/subscriptions?limit=100' + (plan ? '&plan='+plan : ''));
-  const subs = data.subscriptions || [];
-  document.getElementById('subTable').innerHTML = subs.length
-    ? subs.map(s => `<tr>
-        <td><strong>${s.name||'—'}</strong><br><span style="font-size:11px;color:var(--tm)">${s.email||''}</span></td>
-        <td>${planBadge(s.plan||'free')}</td>
-        <td style="color:${s.status==='active'?'var(--gr)':'var(--rd)'};font-size:12px">${s.status||'active'}</td>
-        <td style="font-size:12px;color:var(--tm)">${s.expires_at ? new Date(s.expires_at).toLocaleDateString('en-IN') : 'Never'}</td>
-        <td style="font-size:11px;color:var(--ac)">${Object.keys(s.overrides||{}).length} overrides</td>
-        <td><button class="btn-sm" onclick="openModal('${s.user_id}','${(s.name||'').replace(/'/g,'')}','${s.plan||'free'}')">Manage</button></td>
-      </tr>`).join('')
-    : '<tr><td colspan="6" class="empty">No subscriptions yet</td></tr>';
-}
-
-async function loadRevenue() {
-  const rev = await api('/admin/revenue');
-  const plans = rev.by_plan || [];
-  const get = name => plans.find(p=>p.plan===name);
-  document.getElementById('r-free').textContent = get('free')?.users || 0;
-  document.getElementById('r-prem').textContent = get('premium')?.users || 0;
-  document.getElementById('r-prem-mrr').textContent = '₹' + ((get('premium')?.users||0)*99).toLocaleString();
-  document.getElementById('r-ent').textContent = get('enterprise')?.users || 0;
-  document.getElementById('revKpis').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Paying users</div><div class="kpi-val">${rev.premium_users||0}</div></div>
-    <div class="kpi"><div class="kpi-label">Conversion</div><div class="kpi-val">${rev.conversion_rate||0}%</div></div>
-    <div class="kpi"><div class="kpi-label">Est. MRR</div><div class="kpi-val">₹${(rev.mrr_estimate||0).toLocaleString()}</div></div>
-    <div class="kpi"><div class="kpi-label">Est. ARR</div><div class="kpi-val">₹${((rev.mrr_estimate||0)*12).toLocaleString()}</div></div>`;
-}
-
-function openModal(uid, name, plan) {
-  currentUserId = uid;
-  document.getElementById('modalUserName').textContent = name;
-  document.getElementById('modalPlan').value = plan || 'free';
-  document.getElementById('modalDays').value = 30;
-  document.getElementById('modalNote').value = '';
-  ['meds','yoga','ai','export','ads'].forEach(id => {
-    const btn = document.getElementById('ft-'+id);
-    btn.classList.remove('on'); btn.classList.add('off');
-  });
-  document.getElementById('userModal').classList.add('open');
-}
-function closeModal() { document.getElementById('userModal').classList.remove('open'); }
-
-function toggleFt(feature, btn, onVal, offVal) {
-  const isOn = btn.classList.contains('on');
-  btn.classList.toggle('on', !isOn); btn.classList.toggle('off', isOn);
-  api('/admin/users/' + currentUserId + '/features', { method: 'POST', body: JSON.stringify({ feature, value: !isOn ? onVal : offVal }) });
-}
-
-async function saveSubscription() {
-  const plan = document.getElementById('modalPlan').value;
-  const days = parseInt(document.getElementById('modalDays').value);
-  const note = document.getElementById('modalNote').value;
-  await api('/admin/users/' + currentUserId + '/subscription', { method: 'POST', body: JSON.stringify({ plan, expires_days: days, note }) });
-  closeModal(); loadUsers(); loadSubs('');
-}
-
-function showSection(id, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
-  el.classList.add('active');
-  if (id === 'subscriptions') loadSubs('');
-  if (id === 'revenue') loadRevenue();
-  if (id === 'users') loadUsers();
-  if (id === 'security') loadSecurity();
-  if (id === 'analytics') loadAnalytics();
-  if (id === 'location') loadLocation();
-  if (id === 'devices') loadDevices();
-}
-
-function logout() {
-  TOKEN = ''; window._secretKey = '';
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login').style.display = 'flex';
-  document.getElementById('userPill').style.display = 'none';
-  if (window.google) google.accounts.id.disableAutoSelect();
+    const daily=stats.daily_signups||[];
+    const maxD=Math.max(...daily.map(d=>d.count),1);
+    document.getElementById('signup-chart').innerHTML = daily.map(d=>`<div class="b" style="height:${Math.max(Math.round(d.count/maxD*100),3)}%;background:var(--ac);opacity:.8" title="${d.date}: ${d.count} signups"></div>`).join('');
+    document.getElementById('signup-labels').innerHTML = daily.map((d,i)=>`<span>${i%5===0?d.date.slice(5):''}</span>`).join('');
+  } catch(e) { console.error('Dashboard error:',e); }
 }
 
 async function loadAnalytics() {
   try {
-    const data = await api('/admin/analytics/doses');
-    const o = data.dose_outcomes || {};
-    const total = (o.taken||0) + (o.missed||0) + (o.skipped||0);
-    document.getElementById('doseKpis').innerHTML = `
-      <div class="kpi"><div class="kpi-label">Doses taken (30d)</div><div class="kpi-val" style="color:var(--gr)">${(o.taken||0).toLocaleString()}</div></div>
-      <div class="kpi"><div class="kpi-label">Doses missed</div><div class="kpi-val" style="color:var(--rd)">${(o.missed||0).toLocaleString()}</div></div>
-      <div class="kpi"><div class="kpi-label">Doses skipped</div><div class="kpi-val" style="color:var(--yw)">${(o.skipped||0).toLocaleString()}</div></div>
-      <div class="kpi"><div class="kpi-label">Adherence rate</div><div class="kpi-val">${total>0?Math.round((o.taken||0)/total*100):0}%</div></div>`;
+    const data = await req('/admin/analytics/doses');
+    const o=data.dose_outcomes||{};
+    const total=(o.taken||0)+(o.missed||0)+(o.skipped||0);
+    document.getElementById('a-taken').textContent=(o.taken||0).toLocaleString();
+    document.getElementById('a-missed').textContent=(o.missed||0).toLocaleString();
+    document.getElementById('a-skipped').textContent=(o.skipped||0).toLocaleString();
+    document.getElementById('a-rate').textContent=total>0?Math.round((o.taken||0)/total*100)+'%':'0%';
 
-    document.getElementById('outcomeRows').innerHTML = [
-      {label:'Taken', val:o.taken||0, color:'var(--gr)'},
-      {label:'Missed', val:o.missed||0, color:'var(--rd)'},
-      {label:'Skipped', val:o.skipped||0, color:'var(--yw)'},
-    ].map(r => `<div style="display:flex;align-items:center;gap:10px">
-      <span style="font-size:12px;color:var(--tm);width:50px">${r.label}</span>
-      <div style="flex:1;background:var(--sf2);border-radius:4px;height:8px">
-        <div style="width:${total>0?Math.round(r.val/total*100):0}%;background:${r.color};height:8px;border-radius:4px"></div>
-      </div>
-      <span style="font-size:12px;font-weight:700;color:${r.color};width:40px;text-align:right">${r.val}</span>
-    </div>`).join('');
+    const outcomes=[{l:'Taken',v:o.taken||0,c:'var(--gr)'},{l:'Missed',v:o.missed||0,c:'var(--rd)'},{l:'Skipped',v:o.skipped||0,c:'var(--yw)'}];
+    document.getElementById('a-outcomes').innerHTML=total>0
+      ?outcomes.map(x=>`<div class="bar-row"><span class="bar-lbl">${x.l}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(x.v/total*100)}%;background:${x.c}"></div></div><span class="bar-val" style="color:${x.c}">${x.v}</span></div>`).join('')
+      :'<div class="empty">No dose data yet — install new build on August 1st</div>';
 
-    const meds = data.top_medications || [];
-    document.getElementById('medAnalyticsTable').innerHTML = meds.length
-      ? meds.map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.name}</td><td>${m.doses_taken}</td></tr>`).join('')
-      : '<tr><td colspan="3" class="empty">No dose data yet</td></tr>';
+    const meds=data.top_medications||[];
+    document.getElementById('a-topmeds').innerHTML=meds.length
+      ?meds.slice(0,10).map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.name}</td><td>${m.doses_taken}</td></tr>`).join('')
+      :'<tr><td colspan="3" class="empty">No data yet</td></tr>';
 
-    // Hourly bar chart
-    const hourly = data.hourly_pattern || [];
-    const maxH = Math.max(...hourly.map(h=>h.doses), 1);
-    const hourlyEl = document.getElementById('hourlyChart');
-    const hourlyLbl = document.getElementById('hourlyLabels');
-    hourlyEl.innerHTML = Array.from({length:24},(_,i)=>{
-      const h = hourly.find(x=>x.hour===`${i}:00`);
-      const pct = h ? Math.round(h.doses/maxH*100) : 2;
-      return `<div title="${i}:00 — ${h?.doses||0} doses" style="flex:1;background:${pct>20?'var(--ac)':'var(--sf2)'};height:${Math.max(pct,2)}%;border-radius:2px 2px 0 0;min-height:2px"></div>`;
+    const hourly=data.hourly_pattern||[];
+    const maxH=Math.max(...hourly.map(h=>h.doses),1);
+    document.getElementById('hourly-chart').innerHTML=Array.from({length:24},(_,i)=>{
+      const h=hourly.find(x=>x.hour===`${i}:00`)||{doses:0};
+      const pct=maxH>0?Math.round(h.doses/maxH*100):0;
+      const hot=pct>60;
+      return `<div class="b" style="height:${Math.max(pct,3)}%;background:${hot?'var(--ac)':'var(--sf2)'};border:1px solid ${hot?'var(--ac)':'var(--bd)'}" title="${i}:00 — ${h.doses} doses"></div>`;
     }).join('');
-    hourlyLbl.innerHTML = Array.from({length:24},(_,i)=>
-      `<span style="flex:1;font-size:9px;color:var(--tm);text-align:center">${i%6===0?i+':00':''}</span>`
-    ).join('');
+    document.getElementById('hourly-labels').innerHTML=Array.from({length:24},(_,i)=>`<span>${i%6===0?i+'h':''}</span>`).join('');
 
-    // Day of week chart
-    const dow = data.day_of_week || [];
-    const maxD = Math.max(...dow.map(d=>d.count), 1);
-    const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    document.getElementById('dowChart').innerHTML = days.map(day=>{
-      const d = dow.find(x=>x.day===day);
-      const pct = d ? Math.round(d.count/maxD*100) : 2;
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
-        <div style="width:100%;background:var(--ac);height:${Math.max(pct,2)}%;border-radius:3px 3px 0 0;opacity:${pct>50?1:0.5}"></div>
-      </div>`;
+    const dow=data.day_of_week||[];
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const maxDow=Math.max(...dow.map(d=>d.count),1);
+    document.getElementById('dow-chart').innerHTML=days.map(day=>{
+      const d=dow.find(x=>x.day===day)||{count:0};
+      const pct=maxDow>0?Math.round(d.count/maxDow*100):0;
+      return `<div class="b" style="flex:1;height:${Math.max(pct,3)}%;background:var(--ac);opacity:${pct>0?0.4+pct/100*0.6:0.15}" title="${day}: ${d.count} doses"></div>`;
     }).join('');
-    document.getElementById('dowLabels').innerHTML = days.map(d=>
-      `<span style="flex:1;font-size:10px;color:var(--tm);text-align:center">${d}</span>`
-    ).join('');
-  } catch(e) { console.error('Analytics error:', e); }
+    document.getElementById('dow-labels').innerHTML=days.map(d=>`<span style="flex:1;text-align:center">${d}</span>`).join('');
+  } catch(e) { console.error('Analytics error:',e); }
 }
 
-function exportExcel() {
-  const headers = authHeaders();
-  const url = BACKEND + '/admin/export/users';
-  // Create a temporary link to trigger download with auth
-  fetch(url, { headers }).then(r => {
-    if (!r.ok) { alert('Export failed. Check connection.'); return; }
-    return r.blob();
-  }).then(blob => {
-    if (!blob) return;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'pillcare_export_' + new Date().toISOString().slice(0,10) + '.xlsx';
-    a.click();
-  }).catch(() => alert('Export failed'));
+async function loadUsers() {
+  try {
+    const data=await req('/admin/users?limit=100');
+    allUsers=data.users||[];
+    renderUsers(allUsers);
+  } catch(e) { console.error(e); }
 }
 
-function makeBar(label, count, max, color='var(--ac)') {
-  const pct = max > 0 ? Math.round(count/max*100) : 0;
-  return `<div style="display:flex;align-items:center;gap:8px">
-    <span style="font-size:12px;color:var(--tm);width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${label}">${label}</span>
-    <div style="flex:1;background:var(--sf2);border-radius:4px;height:8px">
-      <div style="width:${pct}%;background:${color};height:8px;border-radius:4px"></div>
-    </div>
-    <span style="font-size:11px;font-weight:700;color:var(--tx);width:30px;text-align:right">${count}</span>
-  </div>`;
+function planPill(p) { return `<span class="pill pill-${p||'free'}">${p||'free'}</span>`; }
+
+function renderUsers(list) {
+  document.getElementById('user-table').innerHTML=list.length
+    ?list.map(u=>`<tr>
+      <td><strong>${u.nickname||'—'}</strong></td>
+      <td style="color:var(--tm);font-size:12px">${u.email||''}</td>
+      <td style="font-size:12px;color:var(--tm)">${u.location||'—'}</td>
+      <td style="text-align:center">${u.medications||0}</td>
+      <td style="text-align:center">${u.doses_taken||0} taken</td>
+      <td>${planPill(u.plan)}</td>
+      <td style="font-size:11px;color:var(--tm)">${u.last_login?new Date(u.last_login).toLocaleDateString('en-IN'):'Never'}</td>
+      <td><button class="btn" onclick="openModal('${u.user_id}','${(u.nickname||'User').replace(/'/g,'')}','${u.plan||'free'}')">Manage</button></td>
+    </tr>`).join('')
+    :'<tr><td colspan="8" class="empty">No users yet</td></tr>';
+}
+
+function filterUsers(q) { renderUsers(allUsers.filter(u=>(u.nickname||'').toLowerCase().includes(q.toLowerCase())||(u.email||'').toLowerCase().includes(q.toLowerCase()))); }
+
+async function loadSubs(plan) {
+  try {
+    const data=await req('/admin/subscriptions?limit=100'+(plan?'&plan='+plan:''));
+    const subs=data.subscriptions||[];
+    document.getElementById('sub-table').innerHTML=subs.length
+      ?subs.map(s=>`<tr>
+        <td><strong>${s.name||'—'}</strong><br><span style="font-size:11px;color:var(--tm)">${s.email||''}</span></td>
+        <td>${planPill(s.plan)}</td>
+        <td style="color:${s.status==='active'?'var(--gr)':'var(--rd)'};font-size:12px">${s.status||'active'}</td>
+        <td style="font-size:12px;color:var(--tm)">${s.expires_at?new Date(s.expires_at).toLocaleDateString('en-IN'):'Never'}</td>
+        <td style="font-size:11px;color:var(--ac)">${Object.keys(s.overrides||{}).length} overrides</td>
+        <td><button class="btn" onclick="openModal('${s.user_id}','${(s.name||'User').replace(/'/g,'')}','${s.plan||'free'}')">Manage</button></td>
+      </tr>`).join('')
+      :'<tr><td colspan="6" class="empty">No subscriptions yet</td></tr>';
+  } catch(e) { console.error(e); }
 }
 
 async function loadLocation() {
   try {
-    const data = await api('/admin/analytics/location');
-    const states = data.states || [];
-    document.getElementById('stateTable').innerHTML = states.length
-      ? states.map((s,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${s.state}</td><td>${s.users}</td></tr>`).join('')
-      : '<tr><td colspan="3" class="empty">No location data yet</td></tr>';
-    const cities = data.cities || [];
-    document.getElementById('cityTable').innerHTML = cities.length
-      ? cities.map((c,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${c.city}</td><td style="color:var(--tm)">${c.state}</td><td>${c.users}</td></tr>`).join('')
-      : '<tr><td colspan="4" class="empty">No city data yet</td></tr>';
-    const ages = data.age_brackets || [];
-    const maxAge = Math.max(...ages.map(a=>a.count), 1);
-    document.getElementById('ageBrackets').innerHTML = ages.map(a=>makeBar(a.bracket, a.count, maxAge, 'var(--ac)')).join('') || '<div class="empty">No data</div>';
-    const genders = data.gender || [];
-    const maxG = Math.max(...genders.map(g=>g.count), 1);
-    const gc = {'male':'#4ade80','female':'#f472b6','other':'#fbbf24','prefer_not_to_say':'var(--tm)'};
-    document.getElementById('genderSplit').innerHTML = genders.map(g=>makeBar(g.gender||'Unknown', g.count, maxG, gc[g.gender]||'var(--ac)')).join('') || '<div class="empty">No data</div>';
+    const data=await req('/admin/analytics/location');
+    const states=data.states||[];
+    document.getElementById('state-table').innerHTML=states.length
+      ?states.map((s,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${s.state}</td><td>${s.users}</td></tr>`).join('')
+      :'<tr><td colspan="3" class="empty">No location data yet</td></tr>';
+    const cities=data.cities||[];
+    document.getElementById('city-table').innerHTML=cities.length
+      ?cities.map((c,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${c.city}</td><td style="color:var(--tm)">${c.state}</td><td>${c.users}</td></tr>`).join('')
+      :'<tr><td colspan="4" class="empty">No city data yet</td></tr>';
+    const ages=data.age_brackets||[];
+    const maxA=Math.max(...ages.map(a=>a.count),1);
+    document.getElementById('age-bars').innerHTML=ages.length
+      ?ages.map(a=>`<div class="bar-row"><span class="bar-lbl">${a.bracket}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(a.count/maxA*100)}%;background:var(--ac)"></div></div><span class="bar-val">${a.count}</span></div>`).join('')
+      :'<div class="empty">No age data yet</div>';
+    const genders=data.gender||[];
+    const maxG=Math.max(...genders.map(g=>g.count),1);
+    const gc={male:'var(--ac)',female:'var(--pk)',other:'var(--yw)',prefer_not_to_say:'var(--tm)'};
+    document.getElementById('gender-bars').innerHTML=genders.length
+      ?genders.map(g=>`<div class="bar-row"><span class="bar-lbl">${g.gender||'Unknown'}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(g.count/maxG*100)}%;background:${gc[g.gender]||'var(--ac)'}"></div></div><span class="bar-val">${g.count}</span></div>`).join('')
+      :'<div class="empty">No gender data yet</div>';
   } catch(e) { console.error(e); }
 }
 
 async function loadDevices() {
   try {
-    const data = await api('/admin/analytics/devices');
-    const brands = data.brands || [];
-    const maxB = Math.max(...brands.map(b=>b.count), 1);
-    document.getElementById('brandBars').innerHTML = brands.length
-      ? brands.map(b=>makeBar(b.brand, b.count, maxB)).join('') : '<div class="empty">No device data yet — available after new build</div>';
-    const os = data.os_versions || [];
-    const maxO = Math.max(...os.map(o=>o.count), 1);
-    document.getElementById('osBars').innerHTML = os.length
-      ? os.map(o=>makeBar(o.os, o.count, maxO, '#4ade80')).join('') : '<div class="empty">No OS data yet — available after new build</div>';
-    const models = data.models || [];
-    document.getElementById('modelTable').innerHTML = models.length
-      ? models.map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.model}</td><td>${m.count}</td></tr>`).join('')
-      : '<tr><td colspan="3" class="empty">No model data yet</td></tr>';
-    const vers = data.app_versions || [];
-    const maxV = Math.max(...vers.map(v=>v.count), 1);
-    document.getElementById('versionBars').innerHTML = vers.length
-      ? vers.map(v=>makeBar('v'+v.version, v.count, maxV, '#fbbf24')).join('') : '<div class="empty">No version data yet</div>';
+    const data=await req('/admin/analytics/devices');
+    function renderBars(elId, items, key, color='var(--ac)') {
+      const max=Math.max(...items.map(x=>x.count),1);
+      document.getElementById(elId).innerHTML=items.length
+        ?items.map(x=>`<div class="bar-row"><span class="bar-lbl">${x[key]}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(x.count/max*100)}%;background:${color}"></div></div><span class="bar-val">${x.count}</span></div>`).join('')
+        :'<div class="empty">No data yet — collect after August 1st build</div>';
+    }
+    renderBars('brand-bars',data.brands||[],'brand');
+    renderBars('os-bars',data.os_versions||[],'os','var(--gr)');
+    renderBars('ver-bars',data.app_versions||[],'version','var(--yw)');
+    const models=data.models||[];
+    document.getElementById('model-table').innerHTML=models.length
+      ?models.map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.model}</td><td>${m.count}</td></tr>`).join('')
+      :'<tr><td colspan="3" class="empty">No model data yet</td></tr>';
+  } catch(e) { console.error(e); }
+}
+
+async function loadRevenue() {
+  try {
+    const rev=await req('/admin/revenue');
+    document.getElementById('r-paying').textContent=(rev.premium_users||0).toLocaleString();
+    document.getElementById('r-conv').textContent=(rev.conversion_rate||0)+'%';
+    const mrr=rev.mrr_estimate||0;
+    document.getElementById('r-mrr').textContent='₹'+mrr.toLocaleString();
+    document.getElementById('r-arr').textContent='₹'+(mrr*12).toLocaleString();
+    const plans=rev.by_plan||[];
+    const get=name=>plans.find(p=>p.plan===name)||{users:0};
+    document.getElementById('r-free').textContent=get('free').users;
+    const prem=get('premium').users;
+    document.getElementById('r-prem').textContent=prem;
+    document.getElementById('r-prem-rev').textContent='₹'+(prem*99).toLocaleString();
+    document.getElementById('r-ent').textContent=get('enterprise').users;
   } catch(e) { console.error(e); }
 }
 
 async function loadSecurity() {
-  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{
-    document.getElementById('myIp').textContent = d.ip;
-  }).catch(()=>{});
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>document.getElementById('myIp').textContent=d.ip).catch(()=>{});
   try {
-    const data = await api('/admin/blocked-ips');
-    const list = data.blocked || [];
-    document.getElementById('secTable').innerHTML = list.length ? list.map(b => `
-      <tr>
+    const data=await req('/admin/blocked-ips');
+    const list=data.blocked||[];
+    document.getElementById('sec-table').innerHTML=list.length
+      ?list.map(b=>`<tr>
         <td><code style="font-size:12px">${b.ip}</code></td>
         <td style="text-align:center;font-weight:700;color:${b.is_blocked?'var(--rd)':'var(--yw)'}">${b.attempts}</td>
         <td style="font-size:11px;color:var(--tm)">${new Date(b.last_attempt).toLocaleString('en-IN')}</td>
-        <td style="font-size:11px;color:var(--tm)">${(b.tried_emails||[]).filter(e=>e).join(', ')||'—'}</td>
-        <td>${b.is_blocked?'<span style="color:var(--rd);font-size:12px;font-weight:600">🚫 Blocked</span>':'<span style="color:var(--yw);font-size:12px">⚠️ Warning</span>'}</td>
-        <td><button class="btn-sm" onclick="unblockIp('${b.ip}',this)">${b.is_blocked?'Unblock':'Clear'}</button></td>
+        <td style="font-size:11px;color:var(--tm)">${(b.tried_emails||[]).filter(Boolean).join(', ')||'—'}</td>
+        <td>${b.is_blocked?'<span style="color:var(--rd);font-size:12px;font-weight:700">🚫 Blocked</span>':'<span style="color:var(--yw);font-size:12px">⚠ Warning</span>'}</td>
+        <td><button class="btn" onclick="unblockIp('${b.ip}',this)">${b.is_blocked?'Unblock':'Clear'}</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="6" class="empty">No failed attempts — all clear ✓</td></tr>';
+      :'<tr><td colspan="6" class="empty">✓ No suspicious activity — all clear</td></tr>';
   } catch(e) { console.error(e); }
 }
 
-async function unblockIp(ip, btn) {
-  btn.textContent = '...';
-  await api('/admin/blocked-ips/' + encodeURIComponent(ip), { method: 'DELETE' });
-  loadSecurity();
+async function unblockIp(ip,btn) { btn.textContent='...'; await req('/admin/blocked-ips/'+encodeURIComponent(ip),{method:'DELETE'}); loadSecurity(); }
+
+// MANAGE MODAL
+function openModal(uid, name, plan) {
+  currentUid=uid; userOverrides={};
+  document.getElementById('modal-name').textContent=name;
+  document.getElementById('modal-plan').value=plan||'free';
+  document.getElementById('modal-days').value=30;
+  document.getElementById('modal-note').value='';
+  document.getElementById('modal-err').style.display='none';
+  // Build feature toggles
+  document.getElementById('ft-grid').innerHTML=FEATURES.map(f=>`
+    <div class="ft-row">
+      <div class="ft-info">
+        <div class="ft-name">${f.label}</div>
+        <div class="ft-desc">${f.desc}</div>
+      </div>
+      <button class="toggle off" id="ft-${f.key}" onclick="toggleFeat('${f.key}',this)" aria-label="${f.label}"></button>
+    </div>`).join('');
+  document.getElementById('manageModal').classList.add('open');
 }
 
-function copyIp() {
-  const ip = document.getElementById('myIp').textContent;
-  navigator.clipboard.writeText(ip).then(()=>alert('IP copied: ' + ip));
+function toggleFeat(key, btn) {
+  const isOn=btn.classList.contains('on');
+  btn.classList.toggle('on',!isOn);
+  btn.classList.toggle('off',isOn);
+  const feat=FEATURES.find(f=>f.key===key);
+  userOverrides[key]=!isOn?feat.onVal:feat.offVal;
+}
+
+function closeModal() { document.getElementById('manageModal').classList.remove('open'); }
+
+async function saveSub() {
+  const plan=document.getElementById('modal-plan').value;
+  const days=parseInt(document.getElementById('modal-days').value)||0;
+  const note=document.getElementById('modal-note').value;
+  try {
+    // 1. Save plan
+    await req('/admin/users/'+currentUid+'/subscription',{method:'POST',body:JSON.stringify({plan,expires_days:days,note})});
+    // 2. Save each feature override
+    for(const [feature,value] of Object.entries(userOverrides)) {
+      await req('/admin/users/'+currentUid+'/features',{method:'POST',body:JSON.stringify({feature,value})});
+    }
+    closeModal();
+    loadUsers(); loadSubs('');
+  } catch(e) {
+    document.getElementById('modal-err').style.display='block';
+    document.getElementById('modal-err').textContent='Failed to save: '+e.message;
+  }
+}
+
+async function exportExcel() {
+  try {
+    const r=await fetch(B+'/admin/export/users',{headers:hdrs()});
+    if(!r.ok){alert('Export failed: '+r.status);return;}
+    const blob=await r.blob();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='pillcare_export_'+new Date().toISOString().slice(0,10)+'.xlsx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  } catch(e){alert('Export failed. Try again.');}
 }
 </script>
 </body>
