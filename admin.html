@@ -139,6 +139,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <button class="nav-item" onclick="showSection('revenue',this)">💰 Revenue</button>
     <div class="nav-sep"></div>
     <button class="nav-item" onclick="showSection('analytics',this)">📈 Analytics</button>
+    <button class="nav-item" onclick="showSection('location',this)">🗺️ Location</button>
+    <button class="nav-item" onclick="showSection('devices',this)">📱 Devices</button>
     <button class="nav-item" onclick="showSection('security',this)">🛡️ Security</button>
     <div class="nav-sep"></div>
     <button class="nav-item" onclick="logout()" style="margin-top:auto">🚪 Sign out</button>
@@ -146,7 +148,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
   <div class="main">
     <div class="section active" id="sec-dashboard">
-      <div class="topbar"><h2>Dashboard</h2><span class="badge-live">● Live</span></div>
+      <div class="topbar">
+        <h2>Dashboard</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="badge-live">● Live</span>
+          <button class="btn-sm" onclick="exportExcel()" style="background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.3);color:var(--gr)">⬇ Export Excel</button>
+        </div>
+      </div>
       <div class="kpis">
         <div class="kpi"><div class="kpi-label">Total users</div><div class="kpi-val" id="k1">—</div><div class="kpi-sub up" id="k1s"></div></div>
         <div class="kpi"><div class="kpi-label">Premium users</div><div class="kpi-val" id="k2">—</div><div class="kpi-sub" id="k2s"></div></div>
@@ -224,6 +232,57 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div style="padding:1.25rem">
           <div id="dowChart" style="display:flex;align-items:flex-end;gap:12px;height:60px"></div>
           <div id="dowLabels" style="display:flex;gap:12px;margin-top:4px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-location">
+      <div class="topbar"><h2>Location & Demographics</h2><button class="btn-sm" onclick="loadLocation()">↻ Refresh</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-header"><h3>Top states</h3></div>
+          <table><thead><tr><th>#</th><th>State</th><th>Users</th></tr></thead>
+          <tbody id="stateTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Top cities</h3></div>
+          <table><thead><tr><th>#</th><th>City</th><th>State</th><th>Users</th></tr></thead>
+          <tbody id="cityTable"><tr><td colspan="4" class="empty">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="card">
+          <div class="card-header"><h3>Age brackets</h3></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="ageBrackets"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Gender split</h3></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="genderSplit"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-devices">
+      <div class="topbar"><h2>Devices & App Versions</h2><button class="btn-sm" onclick="loadDevices()">↻ Refresh</button></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem">
+        <div class="card">
+          <div class="card-header"><h3>Device brands</h3></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="brandBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Android OS versions</h3></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="osBars"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="card">
+          <div class="card-header"><h3>Device models</h3></div>
+          <table><thead><tr><th>#</th><th>Model</th><th>Users</th></tr></thead>
+          <tbody id="modelTable"><tr><td colspan="3" class="empty">Loading...</td></tr></tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>App versions in use</h3></div>
+          <div style="padding:1.25rem;display:flex;flex-direction:column;gap:8px" id="versionBars"></div>
         </div>
       </div>
     </div>
@@ -452,6 +511,8 @@ function showSection(id, el) {
   if (id === 'users') loadUsers();
   if (id === 'security') loadSecurity();
   if (id === 'analytics') loadAnalytics();
+  if (id === 'location') loadLocation();
+  if (id === 'devices') loadDevices();
 }
 
 function logout() {
@@ -519,6 +580,76 @@ async function loadAnalytics() {
       `<span style="flex:1;font-size:10px;color:var(--tm);text-align:center">${d}</span>`
     ).join('');
   } catch(e) { console.error('Analytics error:', e); }
+}
+
+function exportExcel() {
+  const headers = authHeaders();
+  const url = BACKEND + '/admin/export/users';
+  // Create a temporary link to trigger download with auth
+  fetch(url, { headers }).then(r => {
+    if (!r.ok) { alert('Export failed. Check connection.'); return; }
+    return r.blob();
+  }).then(blob => {
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'pillcare_export_' + new Date().toISOString().slice(0,10) + '.xlsx';
+    a.click();
+  }).catch(() => alert('Export failed'));
+}
+
+function makeBar(label, count, max, color='var(--ac)') {
+  const pct = max > 0 ? Math.round(count/max*100) : 0;
+  return `<div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:12px;color:var(--tm);width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${label}">${label}</span>
+    <div style="flex:1;background:var(--sf2);border-radius:4px;height:8px">
+      <div style="width:${pct}%;background:${color};height:8px;border-radius:4px"></div>
+    </div>
+    <span style="font-size:11px;font-weight:700;color:var(--tx);width:30px;text-align:right">${count}</span>
+  </div>`;
+}
+
+async function loadLocation() {
+  try {
+    const data = await api('/admin/analytics/location');
+    const states = data.states || [];
+    document.getElementById('stateTable').innerHTML = states.length
+      ? states.map((s,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${s.state}</td><td>${s.users}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">No location data yet</td></tr>';
+    const cities = data.cities || [];
+    document.getElementById('cityTable').innerHTML = cities.length
+      ? cities.map((c,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${c.city}</td><td style="color:var(--tm)">${c.state}</td><td>${c.users}</td></tr>`).join('')
+      : '<tr><td colspan="4" class="empty">No city data yet</td></tr>';
+    const ages = data.age_brackets || [];
+    const maxAge = Math.max(...ages.map(a=>a.count), 1);
+    document.getElementById('ageBrackets').innerHTML = ages.map(a=>makeBar(a.bracket, a.count, maxAge, 'var(--ac)')).join('') || '<div class="empty">No data</div>';
+    const genders = data.gender || [];
+    const maxG = Math.max(...genders.map(g=>g.count), 1);
+    const gc = {'male':'#4ade80','female':'#f472b6','other':'#fbbf24','prefer_not_to_say':'var(--tm)'};
+    document.getElementById('genderSplit').innerHTML = genders.map(g=>makeBar(g.gender||'Unknown', g.count, maxG, gc[g.gender]||'var(--ac)')).join('') || '<div class="empty">No data</div>';
+  } catch(e) { console.error(e); }
+}
+
+async function loadDevices() {
+  try {
+    const data = await api('/admin/analytics/devices');
+    const brands = data.brands || [];
+    const maxB = Math.max(...brands.map(b=>b.count), 1);
+    document.getElementById('brandBars').innerHTML = brands.length
+      ? brands.map(b=>makeBar(b.brand, b.count, maxB)).join('') : '<div class="empty">No device data yet — available after new build</div>';
+    const os = data.os_versions || [];
+    const maxO = Math.max(...os.map(o=>o.count), 1);
+    document.getElementById('osBars').innerHTML = os.length
+      ? os.map(o=>makeBar(o.os, o.count, maxO, '#4ade80')).join('') : '<div class="empty">No OS data yet — available after new build</div>';
+    const models = data.models || [];
+    document.getElementById('modelTable').innerHTML = models.length
+      ? models.map((m,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${m.model}</td><td>${m.count}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty">No model data yet</td></tr>';
+    const vers = data.app_versions || [];
+    const maxV = Math.max(...vers.map(v=>v.count), 1);
+    document.getElementById('versionBars').innerHTML = vers.length
+      ? vers.map(v=>makeBar('v'+v.version, v.count, maxV, '#fbbf24')).join('') : '<div class="empty">No version data yet</div>';
+  } catch(e) { console.error(e); }
 }
 
 async function loadSecurity() {
