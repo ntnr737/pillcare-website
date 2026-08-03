@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PillCare Admin</title>
-<script src="https://accounts.google.com/gsi/client"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f1117;--sf:#1a1d27;--sf2:#22263a;--ac:#9184d9;--ac2:#a7a1db;--tx:#e9e9ed;--tm:rgba(233,233,237,.55);--bd:rgba(233,233,237,.1);--gr:#4ade80;--rd:#f87171;--yw:#fbbf24;--pk:#f472b6}
@@ -102,9 +102,14 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
   <div class="login-box">
     <div style="font-size:36px">💊</div>
     <h1>PillCare Admin</h1>
-    <p>Sign in with your authorised Google account to access the dashboard.</p>
-    <div id="gBtn"><span style="font-size:12px;color:var(--tm)">Loading...</span></div>
-    <p class="err" id="loginErr">Access denied. This account is not authorised.</p>
+    <p style="color:var(--tm);font-size:14px;margin-bottom:20px">Sign in with your authorised Google account.</p>
+    <div id="gBtn" style="min-height:44px;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:12px;color:var(--tm)">Loading Google Sign-In...</span>
+    </div>
+    <p class="err" id="loginErr" style="display:none"></p>
+    <p style="font-size:11px;color:var(--tm);margin-top:20px;text-align:center">
+      Only <strong style="color:var(--tx)">nitinrai264@gmail.com</strong> can access this panel.
+    </p>
   </div>
 </div>
 
@@ -397,14 +402,24 @@ const FEATURES = [
 
 // Google Sign-In
 window.addEventListener('load', () => {
+  let renderAttempts = 0;
   function tryRender() {
+    renderAttempts++;
+    if (renderAttempts > 50) {
+      document.getElementById('gBtn').innerHTML = '<p style="color:#f87171;font-size:13px">Could not load Google Sign-In.<br>Check your internet connection and refresh.</p>';
+      return;
+    }
     if (!window.google) { setTimeout(tryRender, 200); return; }
-    google.accounts.id.initialize({ client_id: CID, callback: onGoogle, auto_select: false });
-    const c = document.getElementById('gBtn');
-    c.innerHTML = '';
-    google.accounts.id.renderButton(c, { type:'standard', theme:'filled_black', size:'large', text:'signin_with', width:300 });
+    try {
+      google.accounts.id.initialize({ client_id: CID, callback: onGoogle, auto_select: false, use_fedcm_for_prompt: false });
+      const btn = document.getElementById('gBtn');
+      btn.innerHTML = '';
+      google.accounts.id.renderButton(btn, { type:'standard', theme:'filled_black', size:'large', text:'signin_with', width:280, locale:'en' });
+    } catch(e) {
+      document.getElementById('gBtn').innerHTML = '<p style="color:#f87171;font-size:13px">Sign-In error: ' + e.message + '</p>';
+    }
   }
-  tryRender();
+  setTimeout(tryRender, 100);
 });
 
 async function onGoogle(resp) {
@@ -423,7 +438,7 @@ async function onGoogle(resp) {
   } catch { showErr('Connection error. Check your internet.'); }
 }
 
-function showErr(msg) { const e=document.getElementById('loginErr'); e.textContent=msg; e.style.display='block'; setTimeout(()=>e.style.display='none',5000); }
+function showErr(msg) { const e=document.getElementById('loginErr'); e.textContent=msg; e.style.display='block'; e.style.color='#f87171'; setTimeout(()=>e.style.display='none',8000); }
 
 function hdrs() { return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
 
