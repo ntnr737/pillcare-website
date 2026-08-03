@@ -423,19 +423,33 @@ window.addEventListener('load', () => {
 });
 
 async function onGoogle(resp) {
+  showErr('Verifying...');
   try {
-    const r = await fetch(B+'/admin/auth/google', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id_token:resp.credential}) });
-    const d = await r.json();
-    if (!r.ok) { showErr(d.detail||'Access denied'); return; }
+    const r = await fetch(B+'/admin/auth/google', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id_token:resp.credential})
+    });
+    let d;
+    try { d = await r.json(); } catch { d = {}; }
+    if (!r.ok) {
+      const msg = d.detail || `Error ${r.status}: ${r.statusText}`;
+      showErr(msg);
+      return;
+    }
     TOKEN = d.token;
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appPage').style.display = 'block';
     const chip = document.getElementById('userChip');
-    chip.style.display = 'flex';
-    document.getElementById('userPic').src = d.picture||'';
-    document.getElementById('userName').textContent = d.name||d.email;
+    if (chip) chip.style.display = 'flex';
+    const pic = document.getElementById('userPic');
+    if (pic) pic.src = d.picture||'';
+    const name = document.getElementById('userName');
+    if (name) name.textContent = d.name||d.email;
     loadAll();
-  } catch { showErr('Connection error. Check your internet.'); }
+  } catch(e) {
+    showErr('Cannot reach server. Backend may be starting up — wait 30 seconds and try again. (' + e.message + ')');
+  }
 }
 
 function showErr(msg) { const e=document.getElementById('loginErr'); e.textContent=msg; e.style.display='block'; e.style.color='#f87171'; setTimeout(()=>e.style.display='none',8000); }
