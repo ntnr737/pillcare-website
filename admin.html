@@ -123,6 +123,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
     <button class="nav" onclick="go('location',this)">🗺️ Location</button>
     <button class="nav" onclick="go('devices',this)">📱 Devices</button>
     <button class="nav" onclick="go('revenue',this)">💰 Revenue</button>
+    <button class="nav" onclick="go('notifications',this)">📣 Notify</button>
     <button class="nav" onclick="go('security',this)">🛡️ Security</button>
     <div class="sep"></div>
     <button class="nav" onclick="logout()" style="margin-top:auto;color:var(--rd)">🚪 Sign out</button>
@@ -306,6 +307,20 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
     </div>
 
     <!-- SECURITY -->
+    <div class="page" id="pg-notifications">
+      <div class="topbar"><h2>Send Notifications</h2></div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Broadcast to all users</h3><span style="font-size:11px;color:var(--tm)">Sent via Expo Push</span></div>
+        <div class="card-b" style="display:flex;flex-direction:column;gap:12px">
+          <div><label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Title</label>
+            <input type="text" id="notif-title" placeholder="e.g. New feature available" maxlength="100" style="width:100%;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:14px;outline:none;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Message</label>
+            <textarea id="notif-body" placeholder="Your message to all users..." maxlength="300" rows="3" style="width:100%;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:14px;outline:none;resize:none;font-family:inherit;box-sizing:border-box"></textarea></div>
+          <button class="btn primary" onclick="sendNotification()">Send to all users</button>
+          <div id="notif-result" style="display:none;font-size:13px;padding:10px;background:rgba(74,222,128,0.08);border-radius:8px;border:1px solid rgba(74,222,128,0.2);color:var(--gr)"></div>
+        </div>
+      </div>
+    </div>
     <div class="page" id="pg-security">
       <div class="topbar"><h2>Security</h2><button class="btn" onclick="loadSecurity()">↻ Refresh</button></div>
       <div class="card" style="margin-bottom:1rem">
@@ -610,6 +625,23 @@ async function loadRevenue() {
   } catch(e) { console.error(e); }
 }
 
+async function sendNotification() {
+  const title = document.getElementById('notif-title').value.trim();
+  const body = document.getElementById('notif-body').value.trim();
+  if (!title || !body) { alert('Enter both title and message'); return; }
+  if (!confirm(`Send to ALL users?
+
+"${title}"
+${body}`)) return;
+  try {
+    const res = await api('/admin/notify', { method:'POST', body: JSON.stringify({ title, body }) });
+    const el = document.getElementById('notif-result');
+    el.style.display = 'block';
+    el.textContent = `Delivered: ${res.sent} devices | Failed: ${res.failed} | Total: ${res.total}`;
+    document.getElementById('notif-title').value = '';
+    document.getElementById('notif-body').value = '';
+  } catch(e) { alert('Failed: ' + e.message); }
+}
 async function loadSecurity() {
   fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>document.getElementById('myIp').textContent=d.ip).catch(()=>{});
   try {
