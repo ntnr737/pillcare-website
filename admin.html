@@ -663,7 +663,7 @@ async function sendNotification() {
 "${title}"
 ${body}`)) return;
   try {
-    const res = await api('/admin/notify', { method:'POST', body: JSON.stringify({ title, body }) });
+    const res = await req('/admin/notify', { method:'POST', body: JSON.stringify({ title, body }) });
     const el = document.getElementById('notif-result');
     el.style.display = 'block';
     el.textContent = `Delivered: ${res.sent} devices | Failed: ${res.failed} | Total: ${res.total}`;
