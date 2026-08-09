@@ -128,6 +128,8 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
     <button class="nav" onclick="go('location',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Location</button>
     <button class="nav" onclick="go('devices',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M2 17h20"/></svg> Devices</button>
     <button class="nav" onclick="go('revenue',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Revenue</button>
+    <button class="nav" onclick="go('adv-analytics',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M9 17V9M15 17V5M21 17v-1"/></svg> Analytics+</button>
+    <button class="nav" onclick="go('user-insights',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg> Users</button>
     <button class="nav" onclick="go('notifications',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notify</button>
     <button class="nav" onclick="go('security',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security</button>
     <div class="sep"></div>
@@ -311,6 +313,94 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       </div>
     </div>
 
+    <!-- ADVANCED ANALYTICS -->
+    <div class="page" id="pg-adv-analytics">
+      <div class="topbar">
+        <h2>Advanced Analytics</h2>
+        <button class="btn" onclick="loadAdvancedAnalytics()">↻ Refresh</button>
+      </div>
+
+      <!-- Real-time Metrics -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Real-Time Metrics (Last 24 Hours)</h3></div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-l">New Users</div><div class="kpi-v" id="rt-new-users">—</div><div class="kpi-s" id="rt-new-users-trend"></div></div>
+          <div class="kpi"><div class="kpi-l">Active Users</div><div class="kpi-v" id="rt-active">—</div></div>
+          <div class="kpi"><div class="kpi-l">Doses Taken</div><div class="kpi-v" style="color:var(--gr)" id="rt-doses">—</div></div>
+          <div class="kpi"><div class="kpi-l">Adherence Rate</div><div class="kpi-v" id="rt-adherence">—</div></div>
+        </div>
+      </div>
+
+      <!-- Cohort Analysis -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Cohort Analysis - User Retention & Adherence</h3></div>
+        <table>
+          <thead><tr><th>Cohort</th><th>Users</th><th>Active</th><th>Retention</th><th>Avg Adherence</th><th>Churn</th></tr></thead>
+          <tbody id="cohort-table"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Advanced Filtering -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>User Segmentation & Filtering</h3></div>
+        <div class="card-b" style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <label>Metric</label>
+            <select id="filter-metric">
+              <option value="adherence">Adherence Rate</option>
+              <option value="engagement">Engagement Score</option>
+              <option value="revenue">Revenue Potential</option>
+              <option value="health">Health Tracking</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:100px">
+            <label>Min Value</label>
+            <input type="number" id="filter-min" placeholder="0">
+          </div>
+          <div style="flex:1;min-width:100px">
+            <label>Max Value</label>
+            <input type="number" id="filter-max" placeholder="100">
+          </div>
+          <div style="flex:1;min-width:100px">
+            <label>Plan</label>
+            <select id="filter-plan">
+              <option value="">All Plans</option>
+              <option value="free">Free</option>
+              <option value="premium">Premium</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+          </div>
+          <button class="btn primary" onclick="applyAdvancedFilter()" style="align-self:flex-end">Filter</button>
+        </div>
+      </div>
+
+      <!-- Filtered Results -->
+      <div class="card">
+        <div class="card-h"><h3>Filtered Users (<span id="filter-count">0</span>)</h3></div>
+        <table>
+          <thead><tr><th>Email</th><th>Plan</th><th>Metric Value</th><th>Action</th></tr></thead>
+          <tbody id="filtered-users-table"><tr><td colspan="4" class="empty">Apply filter to view results</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USER INSIGHTS -->
+    <div class="page" id="pg-user-insights">
+      <div class="topbar">
+        <h2>User Intelligence Dashboard</h2>
+        <button class="btn" onclick="loadUserInsights()">↻ Refresh</button>
+      </div>
+
+      <!-- Comprehensive User Metrics -->
+      <div class="card">
+        <div class="card-h"><h3>User Metrics (Sorted by Engagement)</h3></div>
+        <table>
+          <thead><tr><th>User</th><th>Engagement</th><th>Adherence</th><th>LTV</th><th>Churn Risk</th><th>Streak</th><th>Action</th></tr></thead>
+          <tbody id="users-intel-table"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- SECURITY -->
     <div class="page" id="pg-notifications">
       <div class="topbar"><h2>Send Notifications</h2></div>
@@ -468,7 +558,7 @@ function go(id, el) {
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   el.classList.add('on');
-  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,security:loadSecurity};
+  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'user-insights':loadUserInsights,security:loadSecurity};
   if (loaders[id]) loaders[id]();
 }
 
@@ -652,6 +742,67 @@ async function loadRevenue() {
     document.getElementById('r-prem-rev').textContent='₹'+(prem*99).toLocaleString();
     document.getElementById('r-ent').textContent=get('enterprise').users;
   } catch(e) { console.error(e); }
+}
+
+async function loadAdvancedAnalytics() {
+  try {
+    // Real-time metrics
+    const rt=await req('/admin/analytics/real-time');
+    const m=rt.metrics||{};
+    document.getElementById('rt-new-users').textContent=(m.new_users||0).toLocaleString();
+    document.getElementById('rt-new-users-trend').textContent=(m.new_users_trend||0)>0?'↑ '+m.new_users_trend.toFixed(1)+'%':'↓ '+m.new_users_trend.toFixed(1)+'%';
+    document.getElementById('rt-new-users-trend').style.color=m.new_users_trend>0?'var(--gr)':'var(--rd)';
+    document.getElementById('rt-active').textContent=(m.active_users||0).toLocaleString();
+    document.getElementById('rt-doses').textContent=(m.doses_taken||0).toLocaleString();
+    document.getElementById('rt-adherence').textContent=(m.adherence_rate||0).toFixed(1)+'%';
+
+    // Cohort analysis
+    const cohorts=await req('/admin/analytics/cohorts');
+    const ct=cohorts.cohorts||[];
+    document.getElementById('cohort-table').innerHTML=ct.length
+      ?ct.map(c=>`<tr><td>${c.cohort_date}</td><td>${c.users_count}</td><td>${c.active_users}</td><td style="color:var(--gr);font-weight:700">${c.retention_rate}%</td><td style="color:var(--ac)">${c.avg_adherence}%</td><td style="color:var(--rd)">${c.churn_users}</td></tr>`).join('')
+      :'<tr><td colspan="6" class="empty">No cohort data</td></tr>';
+  } catch(e) { console.error('Advanced analytics error:',e); }
+}
+
+async function applyAdvancedFilter() {
+  try {
+    const metric=document.getElementById('filter-metric').value;
+    const min=document.getElementById('filter-min').value;
+    const max=document.getElementById('filter-max').value;
+    const plan=document.getElementById('filter-plan').value;
+
+    const params=new URLSearchParams({metric});
+    if(min) params.append('min_value',min);
+    if(max) params.append('max_value',max);
+    if(plan) params.append('plan',plan);
+
+    const data=await req('/admin/analytics/filter?'+params.toString());
+    const users=data.users||[];
+    document.getElementById('filter-count').textContent=users.length;
+    document.getElementById('filtered-users-table').innerHTML=users.length
+      ?users.map(u=>`<tr><td>${u.email}</td><td><span class="pill pill-${u.plan}">${u.plan}</span></td><td style="font-weight:700;color:var(--ac)">${u.metric_value}</td><td><button class="btn" onclick="openModal('${u.user_id}','${u.email.split('@')[0]}','${u.plan}')">Manage</button></td></tr>`).join('')
+      :'<tr><td colspan="4" class="empty">No users match criteria</td></tr>';
+  } catch(e) { console.error('Filter error:',e); }
+}
+
+async function loadUserInsights() {
+  try {
+    const data=await req('/admin/analytics/users/comprehensive?limit=50&sort_by=engagement_score');
+    const users=data.users||[];
+    const colorRisk={high:'var(--rd)',medium:'var(--yw)',low:'var(--gr)'};
+    document.getElementById('users-intel-table').innerHTML=users.length
+      ?users.map(u=>`<tr>
+        <td><strong>${u.nickname||'—'}</strong><br><span style="font-size:11px;color:var(--tm)">${u.email}</span></td>
+        <td style="font-weight:700;color:var(--ac)">${u.engagement_score}</td>
+        <td style="color:${u.adherence_rate>70?'var(--gr)':'var(--rd)'};font-weight:700">${u.adherence_rate}%</td>
+        <td style="color:var(--gr)">₹${u.lifetime_value}</td>
+        <td style="color:${colorRisk[u.churn_risk]||'var(--tm)'}">● ${u.churn_risk}</td>
+        <td style="font-weight:700">${u.current_streak}/${u.best_streak}</td>
+        <td><button class="btn" onclick="openModal('${u.user_id}','${u.nickname.replace(/'/g,'')}','${u.plan}')">Manage</button></td>
+      </tr>`).join('')
+      :'<tr><td colspan="7" class="empty">No users</td></tr>';
+  } catch(e) { console.error('User insights error:',e); }
 }
 
 async function sendNotification() {
