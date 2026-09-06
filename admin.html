@@ -490,8 +490,25 @@ const FEATURES = [
   {key:'max_appointments', label:'Unlimited appointments', desc:'Free: 3 max', onVal:999, offVal:3},
 ];
 
-// Google Sign-In
+// Restore Session & Google Sign-In
 window.addEventListener('load', () => {
+  const savedToken = localStorage.getItem('pillcare_admin_token');
+  const savedUser = localStorage.getItem('pillcare_admin_user');
+  if (savedToken && savedUser) {
+    try {
+      const uData = JSON.parse(savedUser);
+      TOKEN = savedToken;
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appPage').style.display = 'block';
+      const chip = document.getElementById('userChip');
+      if (chip) chip.style.display = 'flex';
+      const pic = document.getElementById('userPic');
+      if (pic) pic.src = uData.picture || '';
+      const name = document.getElementById('userName');
+      if (name) name.textContent = uData.name || uData.email || 'Admin';
+      loadAll();
+    } catch(e) { logout(); }
+  }
   let renderAttempts = 0;
   function tryRender() {
     renderAttempts++;
@@ -528,6 +545,8 @@ async function onGoogle(resp) {
       return;
     }
     TOKEN = d.token;
+    localStorage.setItem('pillcare_admin_token', d.token);
+    localStorage.setItem('pillcare_admin_user', JSON.stringify(d));
     document.getElementById('loginPage').style.display = 'none';
     document.getElementById('appPage').style.display = 'block';
     const chip = document.getElementById('userChip');
@@ -562,7 +581,14 @@ function go(id, el) {
   if (loaders[id]) loaders[id]();
 }
 
-function logout() { TOKEN=''; document.getElementById('appPage').style.display='none'; document.getElementById('loginPage').style.display='flex'; if(window.google)google.accounts.id.disableAutoSelect(); }
+function logout() {
+  TOKEN = '';
+  localStorage.removeItem('pillcare_admin_token');
+  localStorage.removeItem('pillcare_admin_user');
+  document.getElementById('appPage').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  if (window.google) google.accounts.id.disableAutoSelect();
+}
 
 async function loadAll() {
   try {
