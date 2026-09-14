@@ -293,21 +293,24 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
 
     <!-- REVENUE -->
     <div class="page" id="pg-revenue">
-      <div class="topbar"><h2>Revenue</h2><button class="btn" onclick="loadRevenue()">↻ Refresh</button></div>
-      <div class="kpis">
+      <div class="topbar"><h2>JP Morgan Financial Metrics & Subscription Unit Economics</h2><button class="btn" onclick="loadRevenue()">↻ Refresh</button></div>
+      <div class="kpis" style="grid-template-columns:repeat(6,1fr)">
         <div class="kpi"><div class="kpi-l">Paying users</div><div class="kpi-v" id="r-paying">—</div></div>
         <div class="kpi"><div class="kpi-l">Conversion rate</div><div class="kpi-v" id="r-conv">—</div></div>
         <div class="kpi"><div class="kpi-l">Est. MRR</div><div class="kpi-v" style="color:var(--gr)" id="r-mrr">—</div></div>
         <div class="kpi"><div class="kpi-l">Est. ARR</div><div class="kpi-v" style="color:var(--gr)" id="r-arr">—</div></div>
+        <div class="kpi"><div class="kpi-l">ARPU</div><div class="kpi-v" style="color:var(--ac)" id="r-arpu">—</div></div>
+        <div class="kpi"><div class="kpi-l">Est. LTV (12m)</div><div class="kpi-v" style="color:var(--yw)" id="r-ltv">—</div></div>
       </div>
       <div class="card">
-        <div class="card-h"><h3>Plan breakdown</h3></div>
+        <div class="card-h"><h3>Subscription tier distribution</h3></div>
         <table>
-          <thead><tr><th>Plan</th><th>Users</th><th>Price</th><th>Monthly revenue</th></tr></thead>
+          <thead><tr><th>Plan Tier</th><th>Active Subscribers</th><th>Price</th><th>Monthly revenue</th></tr></thead>
           <tbody>
-            <tr><td><span class="pill pill-free">Free</span></td><td id="r-free">—</td><td>₹0</td><td>₹0</td></tr>
-            <tr><td><span class="pill pill-premium">Premium</span></td><td id="r-prem">—</td><td>₹99/mo</td><td id="r-prem-rev">—</td></tr>
-            <tr><td><span class="pill pill-enterprise">Enterprise</span></td><td id="r-ent">—</td><td>Custom</td><td>Custom</td></tr>
+            <tr><td><span class="pill pill-free">Free Plan</span></td><td id="r-free">—</td><td>₹0</td><td>₹0</td></tr>
+            <tr><td><span class="pill pill-free" style="color:var(--ac);border-color:var(--ac)">Pro Dharma (Basic)</span></td><td id="r-basic">—</td><td>₹30/mo</td><td id="r-basic-rev">—</td></tr>
+            <tr><td><span class="pill pill-premium">Elite Moksha (Premium)</span></td><td id="r-prem">—</td><td>₹99/mo</td><td id="r-prem-rev">—</td></tr>
+            <tr><td><span class="pill pill-enterprise">Enterprise / Hospital</span></td><td id="r-ent">—</td><td>Custom</td><td>Custom</td></tr>
           </tbody>
         </table>
       </div>
@@ -402,8 +405,62 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
     </div>
 
     <!-- SECURITY -->
+    <!-- NOTIFICATIONS & FLASH ANNOUNCEMENTS -->
     <div class="page" id="pg-notifications">
-      <div class="topbar"><h2>Send Notifications</h2></div>
+      <div class="topbar"><h2>Send Notifications & Flash Announcements</h2><button class="btn" onclick="loadAnnouncements()">↻ Refresh Flash</button></div>
+      
+      <!-- Swiggy / Zomato Flash In-App Announcement Publisher -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Swiggy / Zomato In-App Flash Announcement</h3><span style="font-size:11px;color:var(--ac)">Real-time Mobile Banner</span></div>
+        <div class="card-b" style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Title</label>
+              <input type="text" id="flash-title" placeholder="e.g. ⚡ Flash Offer" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Badge Style</label>
+              <select id="flash-type" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+                <option value="offer">🎁 Special Offer</option>
+                <option value="info">📢 Information / Feature Release</option>
+                <option value="warning">⚠️ Warning / Maintenance</option>
+                <option value="alert">🚨 Critical System Alert</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Target Tier</label>
+              <select id="flash-target" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+                <option value="all">🌐 All Users</option>
+                <option value="free">Free Users Only</option>
+                <option value="basic">Pro Dharma (Basic) Only</option>
+                <option value="premium">Elite Moksha (Premium) Only</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Message Content</label>
+              <input type="text" id="flash-body" placeholder="e.g. Upgrade to Elite Moksha for ₹99 and unlock unlimited AI Medicine Scanner!" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+            </div>
+            <div>
+              <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Action URL (Optional)</label>
+              <input type="text" id="flash-link" placeholder="https://pillcare.in/upgrade" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+            </div>
+          </div>
+          <button class="btn primary" onclick="publishFlashAnnouncement()">📣 Publish In-App Flash Announcement</button>
+        </div>
+      </div>
+
+      <!-- Active Announcements Table -->
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-h"><h3>Active Live Announcements</h3></div>
+        <table>
+          <thead><tr><th>Type & Title</th><th>Content</th><th>Target</th><th>Published Date</th><th>Action</th></tr></thead>
+          <tbody id="flash-table-body"><tr><td colspan="5" class="empty">Loading announcements...</td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Expo Broadcast Push Notification -->
       <div class="card" style="margin-bottom:1rem">
         <div class="card-h"><h3>Broadcast to all users</h3><span style="font-size:11px;color:var(--tm)">Sent via Expo Push</span></div>
         <div class="card-b" style="display:flex;flex-direction:column;gap:12px">
@@ -577,7 +634,7 @@ function go(id, el) {
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   el.classList.add('on');
-  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'user-insights':loadUserInsights,security:loadSecurity};
+  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'user-insights':loadUserInsights,notifications:loadAnnouncements,security:loadSecurity};
   if (loaders[id]) loaders[id]();
 }
 
@@ -754,20 +811,87 @@ async function loadDevices() {
 
 async function loadRevenue() {
   try {
-    const rev=await req('/admin/revenue');
-    document.getElementById('r-paying').textContent=(rev.premium_users||0).toLocaleString();
-    document.getElementById('r-conv').textContent=(rev.conversion_rate||0)+'%';
-    const mrr=rev.mrr_estimate||0;
-    document.getElementById('r-mrr').textContent='₹'+mrr.toLocaleString();
-    document.getElementById('r-arr').textContent='₹'+(mrr*12).toLocaleString();
-    const plans=rev.by_plan||[];
-    const get=name=>plans.find(p=>p.plan===name)||{users:0};
-    document.getElementById('r-free').textContent=get('free').users;
-    const prem=get('premium').users;
-    document.getElementById('r-prem').textContent=prem;
-    document.getElementById('r-prem-rev').textContent='₹'+(prem*99).toLocaleString();
-    document.getElementById('r-ent').textContent=get('enterprise').users;
+    const fin = await req('/admin/analytics/financials').catch(() => null);
+    if (fin) {
+      document.getElementById('r-paying').textContent = (fin.active_subscribers || 0).toLocaleString();
+      document.getElementById('r-conv').textContent = (fin.paid_conversion_rate || 0) + '%';
+      document.getElementById('r-mrr').textContent = '₹' + (fin.mrr || 0).toLocaleString();
+      document.getElementById('r-arr').textContent = '₹' + (fin.arr || 0).toLocaleString();
+      document.getElementById('r-arpu').textContent = '₹' + (fin.arpu || 0).toLocaleString();
+      document.getElementById('r-ltv').textContent = '₹' + (fin.ltv || 0).toLocaleString();
+
+      const dist = fin.tier_breakdown || {};
+      document.getElementById('r-free').textContent = (dist.free || 0).toLocaleString();
+      const basic = dist.basic || 0;
+      document.getElementById('r-basic').textContent = basic.toLocaleString();
+      document.getElementById('r-basic-rev').textContent = '₹' + (basic * 30).toLocaleString();
+      const prem = dist.premium || 0;
+      document.getElementById('r-prem').textContent = prem.toLocaleString();
+      document.getElementById('r-prem-rev').textContent = '₹' + (prem * 99).toLocaleString();
+      document.getElementById('r-ent').textContent = (dist.enterprise || 0).toLocaleString();
+      return;
+    }
+    const rev = await req('/admin/revenue');
+    document.getElementById('r-paying').textContent = (rev.premium_users || 0).toLocaleString();
+    document.getElementById('r-conv').textContent = (rev.conversion_rate || 0) + '%';
+    const mrr = rev.mrr_estimate || 0;
+    document.getElementById('r-mrr').textContent = '₹' + mrr.toLocaleString();
+    document.getElementById('r-arr').textContent = '₹' + (mrr * 12).toLocaleString();
+    const plans = rev.by_plan || [];
+    const get = name => plans.find(p => p.plan === name) || { users: 0 };
+    document.getElementById('r-free').textContent = get('free').users;
+    const prem = get('premium').users;
+    document.getElementById('r-prem').textContent = prem;
+    document.getElementById('r-prem-rev').textContent = '₹' + (prem * 99).toLocaleString();
+    document.getElementById('r-ent').textContent = get('enterprise').users;
   } catch(e) { console.error(e); }
+}
+
+async function loadAnnouncements() {
+  try {
+    const list = await req('/admin/announcements');
+    const tbody = document.getElementById('flash-table-body');
+    if (!list || list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty">No live flash announcements currently broadcast</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(a => `<tr>
+      <td><span class="pill pill-${a.type || 'info'}">${(a.type || 'info').toUpperCase()}</span> <strong style="margin-left:4px;color:var(--tx)">${a.title || ''}</strong></td>
+      <td style="font-size:12px;color:var(--tm)">${a.body || ''}</td>
+      <td><span class="pill pill-free">${(a.target_plan || 'all').toUpperCase()}</span></td>
+      <td style="font-size:11px;color:var(--tm)">${a.created_at ? new Date(a.created_at).toLocaleString('en-IN') : 'Just now'}</td>
+      <td><button class="btn red" onclick="deleteFlashAnnouncement('${a.id}')">Delete</button></td>
+    </tr>`).join('');
+  } catch (e) { console.error('Flash load error:', e); }
+}
+
+async function publishFlashAnnouncement() {
+  const title = document.getElementById('flash-title').value.trim();
+  const body = document.getElementById('flash-body').value.trim();
+  const type = document.getElementById('flash-type').value;
+  const target_plan = document.getElementById('flash-target').value;
+  const link_url = document.getElementById('flash-link').value.trim();
+
+  if (!title || !body) { alert('Please enter both Title and Message Content.'); return; }
+  try {
+    await req('/admin/announcements', {
+      method: 'POST',
+      body: JSON.stringify({ title, body, type, target_plan, link_url: link_url || undefined })
+    });
+    alert('📢 In-App Flash Announcement published live!');
+    document.getElementById('flash-title').value = '';
+    document.getElementById('flash-body').value = '';
+    document.getElementById('flash-link').value = '';
+    loadAnnouncements();
+  } catch (e) { alert('Failed to publish announcement: ' + e.message); }
+}
+
+async function deleteFlashAnnouncement(annId) {
+  if (!confirm('Are you sure you want to delete this live flash announcement?')) return;
+  try {
+    await req('/admin/announcements/' + annId, { method: 'DELETE' });
+    loadAnnouncements();
+  } catch (e) { alert('Failed to delete announcement: ' + e.message); }
 }
 
 async function loadAdvancedAnalytics() {
