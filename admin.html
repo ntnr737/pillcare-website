@@ -129,6 +129,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
     <button class="nav" onclick="go('devices',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M2 17h20"/></svg> Devices</button>
     <button class="nav" onclick="go('revenue',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Revenue</button>
     <button class="nav" onclick="go('adv-analytics',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M9 17V9M15 17V5M21 17v-1"/></svg> Analytics+</button>
+    <button class="nav" onclick="go('health-intel',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Health Intel</button>
     <button class="nav" onclick="go('user-insights',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg> Users</button>
     <button class="nav" onclick="go('notifications',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notify</button>
     <button class="nav" onclick="go('security',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Security</button>
@@ -385,6 +386,54 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
           <tbody id="filtered-users-table"><tr><td colspan="4" class="empty">Apply filter to view results</td></tr></tbody>
         </table>
       </div>
+    <!-- HEALTHCARE INTELLIGENCE & CONVERSION FUNNEL -->
+    <div class="page" id="pg-health-intel">
+      <div class="topbar">
+        <h2>Healthcare Intelligence & Conversion Radar</h2>
+        <button class="btn" onclick="loadHealthcareIntel()">↻ Refresh Intel</button>
+      </div>
+
+      <div class="kpis" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi" style="border-left:4px solid var(--yw)">
+          <div class="kpi-l">Refill Vulnerability GMV</div>
+          <div class="kpi-v" style="color:var(--yw)" id="hi-refill-gmv">₹0</div>
+          <div class="kpi-s" id="hi-refill-sub">0 Patients low on stock</div>
+        </div>
+        <div class="kpi" style="border-left:4px solid var(--gr)">
+          <div class="kpi-l">Caregiver Shield Health</div>
+          <div class="kpi-v" style="color:var(--gr)" id="hi-caregiver-rate">100%</div>
+          <div class="kpi-s" id="hi-caregiver-sub">0 Escalation alerts sent</div>
+        </div>
+        <div class="kpi" style="border-left:4px solid var(--ac)">
+          <div class="kpi-l">Prescriptions Scanned</div>
+          <div class="kpi-v" style="color:var(--ac)" id="hi-scanned">0</div>
+          <div class="kpi-s">Clinical OCR Imports</div>
+        </div>
+        <div class="kpi" style="border-left:4px solid var(--rd)">
+          <div class="kpi-l">Paywall Conversion CTR</div>
+          <div class="kpi-v" style="color:var(--rd)" id="hi-ctr">0%</div>
+          <div class="kpi-s" id="hi-ctr-sub">0 Upgrade prompts fired</div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-h"><h3>Refill Stock Exhaustion Radar</h3></div>
+          <div class="card-b">
+            <div class="bar-row"><span class="bar-lbl">Low Stock (< 3 Left)</span><div class="bar-track"><div class="bar-fill" id="hi-bar-low" style="width:0%;background:var(--yw)"></div></div><span class="bar-val" id="hi-val-low">0</span></div>
+            <div class="bar-row"><span class="bar-lbl">Patients Affected</span><div class="bar-track"><div class="bar-fill" id="hi-bar-pts" style="width:0%;background:var(--ac)"></div></div><span class="bar-val" id="hi-val-pts">0</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h3>Food Interaction Compliance</h3></div>
+          <div class="card-b">
+            <div class="bar-row"><span class="bar-lbl">Before Food</span><div class="bar-track"><div class="bar-fill" id="hi-bar-bf" style="width:0%;background:var(--ac)"></div></div><span class="bar-val" id="hi-val-bf">0</span></div>
+            <div class="bar-row"><span class="bar-lbl">With Food</span><div class="bar-track"><div class="bar-fill" id="hi-bar-wf" style="width:0%;background:var(--gr)"></div></div><span class="bar-val" id="hi-val-wf">0</span></div>
+            <div class="bar-row"><span class="bar-lbl">After Food</span><div class="bar-track"><div class="bar-fill" id="hi-bar-af" style="width:0%;background:var(--yw)"></div></div><span class="bar-val" id="hi-val-af">0</span></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- USER INSIGHTS -->
@@ -634,7 +683,7 @@ function go(id, el) {
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
   document.getElementById('pg-'+id).classList.add('on');
   el.classList.add('on');
-  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'user-insights':loadUserInsights,notifications:loadAnnouncements,security:loadSecurity};
+  const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'health-intel':loadHealthcareIntel,'user-insights':loadUserInsights,notifications:loadAnnouncements,security:loadSecurity};
   if (loaders[id]) loaders[id]();
 }
 
@@ -1051,6 +1100,42 @@ async function exportExcel() {
     a.download='pillcare_export_'+new Date().toISOString().slice(0,10)+'.xlsx';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   } catch(e){alert('Export failed. Try again.');}
+}
+
+async function loadHealthcareIntel() {
+  try {
+    const data = await req('/admin/analytics/healthcare-intelligence');
+    const rr = data.refill_radar || {};
+    document.getElementById('hi-refill-gmv').textContent = '₹' + (rr.est_refill_gmv_inr || 0).toLocaleString();
+    document.getElementById('hi-refill-sub').textContent = (rr.patients_needing_refill || 0) + ' Patients low on stock';
+
+    const cs = data.caregiver_shield || {};
+    document.getElementById('hi-caregiver-rate').textContent = (cs.escalation_delivery_rate || 100).toFixed(1) + '%';
+    document.getElementById('hi-caregiver-sub').textContent = (cs.total_alerts_dispatched || 0) + ' Escalation alerts sent';
+
+    const cl = data.clinical_safety || {};
+    document.getElementById('hi-scanned').textContent = (cl.scanned_prescriptions_count || 0).toLocaleString();
+
+    const cf = data.conversion_funnel || {};
+    document.getElementById('hi-ctr').textContent = (cf.clickthrough_conversion_rate || 0).toFixed(1) + '%';
+    document.getElementById('hi-ctr-sub').textContent = (cf.prompts_shown || 0) + ' Upgrade prompts fired';
+
+    const maxLow = Math.max(rr.low_stock_medications || 0, 1);
+    const maxPts = Math.max(rr.patients_needing_refill || 0, 1);
+    document.getElementById('hi-val-low').textContent = rr.low_stock_medications || 0;
+    document.getElementById('hi-bar-low').style.width = Math.min(100, Math.round((rr.low_stock_medications || 0) / maxLow * 100)) + '%';
+    document.getElementById('hi-val-pts').textContent = rr.patients_needing_refill || 0;
+    document.getElementById('hi-bar-pts').style.width = Math.min(100, Math.round((rr.patients_needing_refill || 0) / maxPts * 100)) + '%';
+
+    const fr = cl.food_relation_compliance || {};
+    const maxFr = Math.max(fr.before_food || 0, fr.with_food || 0, fr.after_food || 0, 1);
+    document.getElementById('hi-val-bf').textContent = fr.before_food || 0;
+    document.getElementById('hi-bar-bf').style.width = Math.round((fr.before_food || 0) / maxFr * 100) + '%';
+    document.getElementById('hi-val-wf').textContent = fr.with_food || 0;
+    document.getElementById('hi-bar-wf').style.width = Math.round((fr.with_food || 0) / maxFr * 100) + '%';
+    document.getElementById('hi-val-af').textContent = fr.after_food || 0;
+    document.getElementById('hi-bar-af').style.width = Math.round((fr.after_food || 0) / maxFr * 100) + '%';
+  } catch (e) { console.error('Healthcare intel error:', e); }
 }
 </script>
 </body>
