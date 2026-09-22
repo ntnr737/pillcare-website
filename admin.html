@@ -95,8 +95,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none}
 
 /* TOP PROGRESS LOADING BAR & SERVER STATUS BADGE */
-#topProgressBarContainer{position:fixed;top:0;left:0;right:0;height:4px;background:transparent;z-index:99999;pointer-events:none}
-#topProgressBar{height:100%;width:0%;background:linear-gradient(90deg,#9184d9,#4ade80,#f472b6);box-shadow:0 0 10px rgba(145,132,217,0.8);transition:width 0.25s ease,opacity 0.4s ease;border-radius:0 2px 2px 0}
+#topProgressBarContainer{position:fixed;top:0;left:0;right:0;height:6px;background:rgba(15,17,23,0.4);z-index:99999;pointer-events:none}
+#topProgressBar{height:100%;width:0%;background:linear-gradient(90deg,#9184d9,#4ade80,#38bdf8,#f472b6);box-shadow:0 0 14px rgba(145,132,217,0.9);transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1),opacity 0.4s ease;border-radius:0 3px 3px 0}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 #serverStatusWidget{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;background:var(--sf2);border:1px solid var(--bd);transition:.15s}
 #serverStatusWidget:hover{border-color:var(--ac)}
 .status-dot{width:7px;height:7px;border-radius:50%;background:var(--gr)}
@@ -156,6 +157,12 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
   </div>
 
   <div class="main">
+
+  <!-- PAGE-LEVEL LOADING BAR NOTICE -->
+  <div id="pageLoadingNotice" style="display:none;align-items:center;gap:10px;padding:10px 16px;background:rgba(145,132,217,0.12);border:1px solid rgba(145,132,217,0.3);border-radius:10px;margin-bottom:1.25rem;font-size:13px;color:var(--ac);font-weight:600">
+    <div style="width:16px;height:16px;border:2.5px solid var(--ac);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite"></div>
+    <span id="pageLoadingNoticeText">Fetching telemetry & syncing live API data...</span>
+  </div>
 
     <!-- DASHBOARD -->
     <div class="page on" id="pg-dashboard">
@@ -635,30 +642,46 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
 <script>
 
 let activeRequests = 0;
-function startProgress() {
+let progressStartTime = 0;
+
+function startProgress(msg) {
   activeRequests++;
+  progressStartTime = Date.now();
   const bar = document.getElementById('topProgressBar');
+  const notice = document.getElementById('pageLoadingNotice');
+  const txt = document.getElementById('pageLoadingNoticeText');
+  if (notice) notice.style.display = 'flex';
+  if (txt && msg) txt.textContent = msg;
   if (bar) {
     bar.style.opacity = '1';
-    bar.style.width = '30%';
-    setTimeout(() => { if (activeRequests > 0) bar.style.width = '75%'; }, 300);
+    bar.style.width = '40%';
+    bar.style.background = 'linear-gradient(90deg, #9184d9, #4ade80, #38bdf8)';
+    setTimeout(() => { if (activeRequests > 0) bar.style.width = '80%'; }, 250);
   }
 }
+
 function endProgress(success = true) {
   activeRequests = Math.max(0, activeRequests - 1);
   if (activeRequests === 0) {
-    const bar = document.getElementById('topProgressBar');
-    if (bar) {
-      bar.style.width = '100%';
-      if (!success) bar.style.background = 'var(--rd)';
-      setTimeout(() => {
-        bar.style.opacity = '0';
+    const elapsed = Date.now() - progressStartTime;
+    const remainingTime = Math.max(0, 750 - elapsed); // Enforce minimum 750ms visible loading duration
+    
+    setTimeout(() => {
+      const bar = document.getElementById('topProgressBar');
+      const notice = document.getElementById('pageLoadingNotice');
+      if (notice) notice.style.display = 'none';
+      if (bar) {
+        bar.style.width = '100%';
+        if (!success) bar.style.background = 'var(--rd)';
         setTimeout(() => {
-          bar.style.width = '0%';
-          bar.style.background = 'linear-gradient(90deg, #9184d9, #4ade80, #f472b6)';
-        }, 400);
-      }, 300);
-    }
+          bar.style.opacity = '0';
+          setTimeout(() => {
+            bar.style.width = '0%';
+            bar.style.background = 'linear-gradient(90deg, #9184d9, #4ade80, #38bdf8)';
+          }, 400);
+        }, 350);
+      }
+    }, remainingTime);
   }
 }
 
@@ -873,10 +896,13 @@ async function req(path, opts={}) {
 function go(id, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
-  document.getElementById('pg-'+id).classList.add('on');
-  el.classList.add('on');
+  const pg = document.getElementById('pg-'+id);
+  if (pg) pg.classList.add('on');
+  if (el) el.classList.add('on');
+  startProgress('Loading ' + id + ' telemetry & metrics...');
   const loaders = {analytics:loadAnalytics,users:loadUsers,subscriptions:()=>loadSubs(''),location:loadLocation,devices:loadDevices,revenue:loadRevenue,'adv-analytics':loadAdvancedAnalytics,'health-intel':loadHealthcareIntel,'user-insights':loadUserInsights,notifications:loadAnnouncements,security:loadSecurity};
   if (loaders[id]) loaders[id]();
+  else endProgress(true);
 }
 
 function logout() {
