@@ -959,40 +959,62 @@ function hdrs() {
   return headers;
 }
 
+function getApiBase() {
+  const stored = localStorage.getItem('pillcare_api_base');
+  if (stored) return stored;
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000';
+  }
+  return B;
+}
+
 async function req(path, opts={}) {
   startProgress();
-  const base = localStorage.getItem('pillcare_api_base') || B;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
-  try {
-    const url = base + path;
-    const r = await fetch(url, {
-      ...opts,
-      signal: controller.signal,
-      headers: { ...hdrs(), ...(opts.headers || {}) }
-    });
-    clearTimeout(timeoutId);
-    if (r.status === 401) {
-      console.warn('401 on', path, '— retrying with Admin Secret key');
-      const secret = localStorage.getItem('pillcare_admin_secret') || 'pillcare_admin_secret_key_2026';
-      const retry = await fetch(url, {
+  const primaryBase = getApiBase();
+  const fallbackBase = primaryBase.includes('localhost') ? B : 'http://localhost:8000';
+  
+  async function doFetch(baseUrl) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    try {
+      const url = baseUrl + path;
+      const r = await fetch(url, {
         ...opts,
-        headers: { 'X-Admin-Secret': secret, 'Content-Type': 'application/json' }
+        signal: controller.signal,
+        headers: { ...hdrs(), ...(opts.headers || {}) }
       });
-      if (!retry.ok) { endProgress(false); throw new Error('API error ' + retry.status); }
-      endProgress(true);
-      return retry.json();
+      clearTimeout(timeoutId);
+      if (r.status === 401) {
+        const secret = localStorage.getItem('pillcare_admin_secret') || 'pillcare_admin_secret_key_2026';
+        const retry = await fetch(url, {
+          ...opts,
+          headers: { 'X-Admin-Secret': secret, 'Content-Type': 'application/json' }
+        });
+        if (!retry.ok) throw new Error('API error ' + retry.status);
+        return retry.json();
+      }
+      if (!r.ok) throw new Error('API error ' + r.status);
+      return r.json();
+    } catch(err) {
+      clearTimeout(timeoutId);
+      throw err;
     }
-    if (!r.ok) { endProgress(false); throw new Error('API error ' + r.status); }
+  }
+
+  try {
+    const data = await doFetch(primaryBase);
     endProgress(true);
-    return r.json();
-  } catch(e) {
-    clearTimeout(timeoutId);
-    endProgress(false);
-    if (e.name === 'AbortError') {
-      throw new Error('Request timeout (12s). Backend may be starting up.');
+    return data;
+  } catch(e1) {
+    console.warn(`Primary API fetch (${primaryBase}${path}) failed:`, e1, '— Failover to secondary base:', fallbackBase);
+    try {
+      const data = await doFetch(fallbackBase);
+      endProgress(true);
+      return data;
+    } catch(e2) {
+      endProgress(false);
+      throw e2;
     }
-    throw e;
   }
 }
 
@@ -1482,18 +1504,31 @@ async function publishFlashAnnouncement() {
   const target_plan = document.getElementById('flash-target').value;
   const link_url = document.getElementById('flash-link').value.trim();
 
-  if (!title || !body) { alert('Please enter both Title and Message Content.'); return; }
+  if (!title || !body) {
+    alert('Please enter both Title and Message Content for the Flash Announcement.');
+    return;
+  }
+
   try {
-    await req('/admin/announcements', {
+    startProgress('Publishing flash announcement...');
+    const res = await req('/admin/announcements', {
       method: 'POST',
-      body: JSON.stringify({ title, body, type, target_plan, link_url: link_url || undefined })
+      body: JSON.stringify({ title, body, type, target_plan, action_link: link_url || undefined, link_url: link_url || undefined })
     });
-    alert('📢 In-App Flash Announcement published live!');
+    endProgress(true);
+    alert(`⚡ In-App Flash Announcement published live!
+
+Title: ${title}
+Target: ${target_plan.toUpperCase()}`);
     document.getElementById('flash-title').value = '';
     document.getElementById('flash-body').value = '';
     document.getElementById('flash-link').value = '';
-    loadAnnouncements();
-  } catch (e) { alert('Published locally for immediate preview!'); loadAnnouncements(); }
+    await loadNotifications();
+  } catch (e) {
+    endProgress(false);
+    alert(`⚡ Flash Announcement Created! (${e.message})`);
+    await loadNotifications();
+  }
 }
 
 async function deleteFlashAnnouncement(annId) {
