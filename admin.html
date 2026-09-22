@@ -1480,7 +1480,7 @@ async function sendNotification() {
       resultBox.style.color = 'var(--gr)';
       resultBox.style.background = 'rgba(74,222,128,0.1)';
       resultBox.style.borderColor = 'rgba(74,222,128,0.3)';
-      resultBox.textContent = `✅ Push Notification Dispatched! Delivered: ${res.sent || 12} devices | Failed: ${res.failed || 0} | Total: ${res.total || 12}`;
+      resultBox.textContent = `✅ Push Notification Dispatched! Delivered: ${res.sent ?? 0} devices | Failed: ${res.failed ?? 0} | Total: ${res.total ?? 0}`;
     }
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value = '';
