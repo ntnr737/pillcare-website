@@ -6,7 +6,17 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=15552000; includeSubDomains
 
+/admin
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  X-Frame-Options: DENY
+
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  X-Frame-Options: DENY
+
 /admin.html
   X-Robots-Tag: noindex, nofollow
-  Cache-Control: no-store, no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
   X-Frame-Options: DENY
