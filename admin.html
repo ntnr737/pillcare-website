@@ -551,8 +551,15 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       <label>Subscription plan</label>
       <select id="modal-plan">
         <option value="free">Free — 3 medications, 7-day history</option>
-        <option value="premium">Premium — Unlimited everything (₹99/mo)</option>
+        <option value="premium">Premium — Unlimited everything (₹99/mo or ₹999/yr)</option>
         <option value="enterprise">Enterprise — Custom pricing</option>
+      </select>
+    </div>
+    <div>
+      <label>Billing Cycle</label>
+      <select id="modal-cycle">
+        <option value="monthly">Monthly — ₹99/mo (30 days)</option>
+        <option value="annual">Annual — ₹999/yr (365 days)</option>
       </select>
     </div>
     <div>
@@ -1046,6 +1053,7 @@ function openModal(uid, name, plan) {
   currentUid=uid; userOverrides={};
   document.getElementById('modal-name').textContent=name;
   document.getElementById('modal-plan').value=plan||'free';
+  document.getElementById('modal-cycle').value='monthly';
   document.getElementById('modal-days').value=30;
   document.getElementById('modal-note').value='';
   document.getElementById('modal-err').style.display='none';
@@ -1073,11 +1081,12 @@ function closeModal() { document.getElementById('manageModal').classList.remove(
 
 async function saveSub() {
   const plan=document.getElementById('modal-plan').value;
-  const days=parseInt(document.getElementById('modal-days').value)||0;
+  const cycle=document.getElementById('modal-cycle').value;
+  const days=parseInt(document.getElementById('modal-days').value)||(cycle==='annual'?365:30);
   const note=document.getElementById('modal-note').value;
   try {
-    // 1. Save plan
-    await req('/admin/users/'+currentUid+'/subscription',{method:'POST',body:JSON.stringify({plan,expires_days:days,note})});
+    // 1. Save plan & billing cycle
+    await req('/admin/users/'+currentUid+'/subscription',{method:'POST',body:JSON.stringify({plan,billing_cycle:cycle,expires_days:days,note})});
     // 2. Save each feature override
     for(const [feature,value] of Object.entries(userOverrides)) {
       await req('/admin/users/'+currentUid+'/features',{method:'POST',body:JSON.stringify({feature,value})});
