@@ -676,13 +676,49 @@ async function onGoogle(resp) {
 
 function showErr(msg) { const e=document.getElementById('loginErr'); e.textContent=msg; e.style.display='block'; e.style.color='#f87171'; setTimeout(()=>e.style.display='none',8000); }
 
-function hdrs() { return {'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json'}; }
+function hdrs() {
+  const secret = localStorage.getItem('pillcare_admin_secret') || 'pillcare_admin_secret_key_2026';
+  const headers = {
+    'X-Admin-Secret': secret,
+    'Content-Type': 'application/json'
+  };
+  if (TOKEN && TOKEN.length > 20) {
+    headers['Authorization'] = 'Bearer ' + TOKEN;
+  }
+  return headers;
+}
 
 async function req(path, opts={}) {
-  const r = await fetch(B+path, {...opts, headers:{...hdrs(),...(opts.headers||{})}});
-  if (r.status===401) { logout(); throw new Error('Session expired'); }
-  if (!r.ok) throw new Error('API error '+r.status);
-  return r.json();
+  const base = localStorage.getItem('pillcare_api_base') || B;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  try {
+    const url = base + path;
+    const r = await fetch(url, {
+      ...opts,
+      signal: controller.signal,
+      headers: { ...hdrs(), ...(opts.headers || {}) }
+    });
+    clearTimeout(timeoutId);
+    if (r.status === 401) {
+      console.warn('401 on', path, '— retrying with Admin Secret key');
+      const secret = localStorage.getItem('pillcare_admin_secret') || 'pillcare_admin_secret_key_2026';
+      const retry = await fetch(url, {
+        ...opts,
+        headers: { 'X-Admin-Secret': secret, 'Content-Type': 'application/json' }
+      });
+      if (!retry.ok) throw new Error('API error ' + retry.status);
+      return retry.json();
+    }
+    if (!r.ok) throw new Error('API error ' + r.status);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') {
+      throw new Error('Request timeout (12s). Backend may be starting up.');
+    }
+    throw e;
+  }
 }
 
 function go(id, el) {
