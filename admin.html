@@ -1523,10 +1523,12 @@ Target: ${target_plan.toUpperCase()}`);
     document.getElementById('flash-title').value = '';
     document.getElementById('flash-body').value = '';
     document.getElementById('flash-link').value = '';
+    await loadAnnouncements();
     await loadNotifications();
   } catch (e) {
     endProgress(false);
     alert(`⚡ Flash Announcement Created! (${e.message})`);
+    await loadAnnouncements();
     await loadNotifications();
   }
 }
