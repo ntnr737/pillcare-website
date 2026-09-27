@@ -154,7 +154,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       <span id="userName"></span>
     </div>
     <button class="nav on" onclick="go('dashboard',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> Dashboard</button>
-    <button class="nav" onclick="go('notifications',this)" style="background:rgba(145,132,217,0.15);border:1px solid rgba(145,132,217,0.4);color:var(--ac);font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9184d9" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> 📢 Push & Flash Alerts <span style="font-size:9px;background:var(--ac);color:#fff;padding:2px 6px;border-radius:10px;margin-left:auto">LIVE</span></button>
+    <button class="nav" onclick="go('notifications',this)" style="background:rgba(145,132,217,0.15);border:1px solid rgba(145,132,217,0.4);color:var(--ac);font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9184d9" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Push & Flash Alerts <span style="font-size:9px;background:var(--ac);color:#fff;padding:2px 6px;border-radius:10px;margin-left:auto">LIVE</span></button>
     <button class="nav" onclick="go('analytics',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/><polyline points="12 12 20 7.5"/><polyline points="12 12 12 21"/><polyline points="12 12 4 7.5"/></svg> Analytics</button>
     <button class="nav" onclick="go('users',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 1-4-4H5a4 4 0 0 1-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 1-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> User Directory</button>
     <button class="nav" onclick="go('subscriptions',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><path d="M1 10h22"/></svg> Subscriptions</button>
@@ -198,8 +198,8 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            <button class="btn primary" onclick="go('notifications')" style="padding:9px 18px;font-size:13px;font-weight:700;background:var(--ac)">🚀 Open Push Broadcaster</button>
-            <button class="btn green" onclick="go('notifications');setTimeout(() => { document.getElementById('flash-title')?.focus(); }, 300)" style="padding:9px 18px;font-size:13px;font-weight:700">⚡ Flash Announcement Publisher</button>
+            <button class="btn primary" onclick="go('notifications')" style="padding:9px 18px;font-size:13px;font-weight:700;background:var(--ac)">Open Push Broadcaster</button>
+            <button class="btn green" onclick="go('notifications');setTimeout(() => { document.getElementById('flash-title')?.focus(); }, 300)" style="padding:9px 18px;font-size:13px;font-weight:700">Flash Announcement Publisher</button>
           </div>
         </div>
       </div>
@@ -525,12 +525,12 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       <!-- TOP HEADER & REFRESH -->
       <div class="topbar">
         <div>
-          <h2>📢 Notification & Announcement Broadcast Hub</h2>
+          <h2>Notification & Announcement Broadcast Hub</h2>
           <p style="font-size:12px;color:var(--tm);margin-top:2px">Dispatch real-time push notifications & in-app flash banners with live mobile device simulator</p>
         </div>
         <div style="display:flex;gap:8px">
           <button class="btn" onclick="loadNotifications()">↻ Refresh Telemetry</button>
-          <button class="btn primary" onclick="registerTestPushToken()" style="font-size:12px">🧪 Register Test Token</button>
+          <button class="btn primary" onclick="registerTestPushToken()" style="font-size:12px">Register Test Token</button>
         </div>
       </div>
 
@@ -565,23 +565,23 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
           <!-- TAB SWITCHER HEADER -->
           <div style="display:flex;align-items:center;border-bottom:1px solid var(--bd);background:var(--sf2);padding:4px 8px;border-radius:12px 12px 0 0">
             <button class="notif-tab-btn active" id="tab-btn-push" onclick="switchNotifTab('push')" style="padding:10px 16px;border:none;background:var(--sf);color:var(--tx);font-weight:700;font-size:13px;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:6px">
-              📲 Push Notification Broadcast
+              Push Notification Broadcast
             </button>
             <button class="notif-tab-btn" id="tab-btn-flash" onclick="switchNotifTab('flash')" style="padding:10px 16px;border:none;background:none;color:var(--tm);font-weight:700;font-size:13px;cursor:pointer;border-radius:8px;display:flex;align-items:center;gap:6px">
-              ⚡ In-App Flash Banner
+              In-App Flash Banner
             </button>
           </div>
 
           <div style="padding:1.25rem">
             <!-- QUICK PRESET TEMPLATE BADGES -->
             <div style="margin-bottom:1.2rem">
-              <label style="font-size:10px;color:var(--ac);font-weight:800;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px">⚡ 1-Click Preset Broadcast Templates</label>
+              <label style="font-size:10px;color:var(--ac);font-weight:800;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:6px">1-Click Preset Broadcast Templates</label>
               <div style="display:flex;gap:6px;flex-wrap:wrap">
-                <button type="button" onclick="applyNotifPreset('dose')" style="background:rgba(145,132,217,0.15);border:1px solid rgba(145,132,217,0.3);color:var(--ac);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">💊 Dose Reminder</button>
-                <button type="button" onclick="applyNotifPreset('feature')" style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">✨ AI Feature Launch</button>
-                <button type="button" onclick="applyNotifPreset('offer')" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:var(--yw);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">🎁 50% Pro Discount</button>
-                <button type="button" onclick="applyNotifPreset('tip')" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:var(--gr);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">🩺 Daily Health Tip</button>
-                <button type="button" onclick="applyNotifPreset('alert')" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:var(--rd);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">⚠️ Server Maintenance</button>
+                <button type="button" onclick="applyNotifPreset('dose')" style="background:rgba(145,132,217,0.15);border:1px solid rgba(145,132,217,0.3);color:var(--ac);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Dose Reminder</button>
+                <button type="button" onclick="applyNotifPreset('feature')" style="background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);color:#38bdf8;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">AI Feature Launch</button>
+                <button type="button" onclick="applyNotifPreset('offer')" style="background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.3);color:var(--yw);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">50% Pro Discount</button>
+                <button type="button" onclick="applyNotifPreset('tip')" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:var(--gr);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Daily Health Tip</button>
+                <button type="button" onclick="applyNotifPreset('alert')" style="background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:var(--rd);padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer">Server Maintenance</button>
               </div>
             </div>
 
@@ -590,14 +590,14 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
                 <div>
                   <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Notification Title</label>
-                  <input type="text" id="notif-title" oninput="updateLivePreview()" placeholder="e.g. 💊 PillCare Dosage Reminder" maxlength="100" style="width:100%;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+                  <input type="text" id="notif-title" oninput="updateLivePreview()" placeholder="e.g. PillCare Dosage Reminder" maxlength="100" style="width:100%;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
                 </div>
                 <div>
                   <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Target Audience Cohort</label>
                   <select id="notif-target-filter" onchange="updateLivePreview()" style="width:100%;padding:10px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
-                    <option value="all">🌐 All Mobile App Devices</option>
-                    <option value="premium">⭐ Premium Subscribers Only</option>
-                    <option value="free">🆓 Free Plan Users Only</option>
+                    <option value="all">All Mobile App Devices</option>
+                    <option value="premium">Premium Subscribers Only</option>
+                    <option value="free">Free Plan Users Only</option>
                   </select>
                 </div>
               </div>
@@ -607,7 +607,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
                 <span style="font-size:11px;color:var(--tm)">Dispatches batch payload via Expo Push API (FCM/APNs)</span>
-                <button class="btn primary" onclick="sendNotification()" style="font-size:13px;padding:10px 20px;font-weight:800;background:var(--ac);box-shadow:0 0 15px rgba(145,132,217,0.4)">🚀 Dispatch Push Broadcast</button>
+                <button class="btn primary" onclick="sendNotification()" style="font-size:13px;padding:10px 20px;font-weight:800;background:var(--ac);box-shadow:0 0 15px rgba(145,132,217,0.4)">Dispatch Push Broadcast</button>
               </div>
               <div id="notif-result" style="display:none;font-size:13px;padding:12px;background:rgba(74,222,128,0.1);border-radius:9px;border:1px solid rgba(74,222,128,0.3);color:var(--gr);font-weight:600"></div>
             </div>
@@ -617,21 +617,21 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
               <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
                 <div>
                   <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Banner Title</label>
-                  <input type="text" id="flash-title" oninput="updateLivePreview()" placeholder="e.g. ⚡ Flash Offer" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
+                  <input type="text" id="flash-title" oninput="updateLivePreview()" placeholder="e.g. Flash Offer" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
                 </div>
                 <div>
                   <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Badge Style</label>
                   <select id="flash-type" onchange="updateLivePreview()" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
-                    <option value="offer">🎁 Special Offer</option>
-                    <option value="info">📢 Feature Release</option>
-                    <option value="warning">⚠️ Warning / Maintenance</option>
-                    <option value="alert">🚨 Critical System Alert</option>
+                    <option value="offer">Special Offer</option>
+                    <option value="info">Feature Release</option>
+                    <option value="warning">Warning / Maintenance</option>
+                    <option value="alert">Critical System Alert</option>
                   </select>
                 </div>
                 <div>
                   <label style="font-size:11px;color:var(--tm);font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px">Target Tier</label>
                   <select id="flash-target" onchange="updateLivePreview()" style="width:100%;padding:9px 12px;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-size:13px;outline:none">
-                    <option value="all">🌐 All Users</option>
+                    <option value="all">All Users</option>
                     <option value="free">Free Users Only</option>
                     <option value="basic">Pro Dharma Only</option>
                     <option value="premium">Elite Moksha Only</option>
@@ -649,7 +649,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
                 </div>
               </div>
               <div style="display:flex;justify-content:flex-end;margin-top:4px">
-                <button class="btn primary" onclick="publishFlashAnnouncement()" style="font-size:13px;padding:10px 20px;font-weight:800;background:var(--ac);box-shadow:0 0 15px rgba(145,132,217,0.4)">📣 Publish Live Flash Banner</button>
+                <button class="btn primary" onclick="publishFlashAnnouncement()" style="font-size:13px;padding:10px 20px;font-weight:800;background:var(--ac);box-shadow:0 0 15px rgba(145,132,217,0.4)">Publish Live Flash Banner</button>
               </div>
             </div>
           </div>
@@ -684,7 +684,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
                   </div>
                   <span style="font-size:9px;color:rgba(233,233,237,0.5)">now</span>
                 </div>
-                <div id="sim-push-title-text" style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">💊 PillCare Dosage Reminder</div>
+                <div id="sim-push-title-text" style="font-size:11px;font-weight:700;color:#fff;margin-bottom:2px">PillCare Dosage Reminder</div>
                 <div id="sim-push-body-text" style="font-size:10px;color:rgba(233,233,237,0.8);line-height:1.3;word-break:break-word">It's time to record your 8:00 PM Metformin dose! Open PillCare to mark as taken.</div>
               </div>
             </div>
@@ -697,16 +697,16 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
                 <div style="width:18px;height:18px;border-radius:50%;background:#9184d9"></div>
               </div>
               <div style="font-size:9px;color:#889;margin-bottom:4px">Today's Schedule</div>
-              <div style="background:#1a1d27;border-radius:6px;padding:6px;margin-bottom:4px;font-size:9px;color:#ccc">💊 Metformin 500mg • 8:00 PM</div>
-              <div style="background:#1a1d27;border-radius:6px;padding:6px;font-size:9px;color:#ccc">🩺 Vitamin D3 • 9:00 PM</div>
+              <div style="background:#1a1d27;border-radius:6px;padding:6px;margin-bottom:4px;font-size:9px;color:#ccc">Metformin 500mg • 8:00 PM</div>
+              <div style="background:#1a1d27;border-radius:6px;padding:6px;font-size:9px;color:#ccc">Vitamin D3 • 9:00 PM</div>
 
               <!-- FLASH BANNER MOCK OVERLAY -->
               <div id="sim-flash-card" style="position:absolute;top:32px;left:8px;right:8px;background:linear-gradient(135deg, #1a1d27, #22263a);border:1px solid #9184d9;border-radius:10px;padding:8px;box-shadow:0 8px 20px rgba(0,0,0,0.6)">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
-                  <span id="sim-flash-badge-text" style="font-size:8px;font-weight:800;background:rgba(251,191,36,0.2);color:#fbbf24;padding:2px 5px;border-radius:4px">🎁 SPECIAL OFFER</span>
+                  <span id="sim-flash-badge-text" style="font-size:8px;font-weight:800;background:rgba(251,191,36,0.2);color:#fbbf24;padding:2px 5px;border-radius:4px">SPECIAL OFFER</span>
                   <span style="font-size:9px;color:#778;cursor:pointer">✕</span>
                 </div>
-                <div id="sim-flash-title-text" style="font-size:10px;font-weight:700;color:#fff;margin-bottom:2px">⚡ Flash Offer</div>
+                <div id="sim-flash-title-text" style="font-size:10px;font-weight:700;color:#fff;margin-bottom:2px">Flash Offer</div>
                 <div id="sim-flash-body-text" style="font-size:9px;color:#bbb;line-height:1.2;margin-bottom:5px">Upgrade to Elite Moksha for ₹99!</div>
                 <div style="text-align:right"><span id="sim-flash-btn-text" style="font-size:8px;font-weight:800;color:#9184d9;background:rgba(145,132,217,0.15);padding:2px 6px;border-radius:4px">View Offer ➔</span></div>
               </div>
@@ -723,7 +723,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       <!-- ACTIVE FLASH ANNOUNCEMENTS TABLE -->
       <div class="card" style="margin-bottom:1.5rem">
         <div class="card-h" style="display:flex;align-items:center;justify-content:space-between">
-          <h3>⚡ Active In-App Flash Announcement Banners</h3>
+          <h3>Active In-App Flash Announcement Banners</h3>
           <span style="font-size:11px;color:var(--gr);font-weight:600">● Live In-App Broadcast</span>
         </div>
         <table>
@@ -734,7 +734,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
 
       <!-- PUSH BROADCAST DISPATCH HISTORY TABLE -->
       <div class="card" style="margin-bottom:1.5rem">
-        <div class="card-h"><h3>📜 Push Broadcast Dispatch Logs</h3></div>
+        <div class="card-h"><h3>Push Broadcast Dispatch Logs</h3></div>
         <table>
           <thead><tr><th>Title & Target</th><th>Message Content</th><th>Tokens Targeted</th><th>Delivery Status</th><th>Timestamp</th></tr></thead>
           <tbody id="push-history-table-body"><tr><td colspan="5" class="empty">Loading push logs...</td></tr></tbody>
@@ -744,8 +744,8 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       <!-- REGISTERED MOBILE DEVICE PUSH TOKENS TABLE -->
       <div class="card" style="margin-bottom:1.5rem">
         <div class="card-h" style="display:flex;align-items:center;justify-content:space-between">
-          <h3>📲 Registered Mobile Device Push Tokens</h3>
-          <button class="btn" onclick="registerTestPushToken()" style="font-size:11px;padding:4px 10px">➕ Add Test Token</button>
+          <h3>Registered Mobile Device Push Tokens</h3>
+          <button class="btn" onclick="registerTestPushToken()" style="font-size:11px;padding:4px 10px">Add Test Token</button>
         </div>
         <table>
           <thead><tr><th>User / Email</th><th>Device Push Token</th><th>Subscription Plan</th><th>Last Token Update</th></tr></thead>
@@ -1580,7 +1580,7 @@ function switchNotifTab(mode) {
 }
 
 function updateLivePreview() {
-  const notifTitle = document.getElementById('notif-title')?.value.trim() || '💊 PillCare Dosage Reminder';
+  const notifTitle = document.getElementById('notif-title')?.value.trim() || 'PillCare Dosage Reminder';
   const notifBody = document.getElementById('notif-body')?.value.trim() || "It's time to record your 8:00 PM Metformin dose! Open PillCare to mark as taken.";
   
   const pushTitleEl = document.getElementById('sim-push-title-text');
@@ -1588,7 +1588,7 @@ function updateLivePreview() {
   if (pushTitleEl) pushTitleEl.textContent = notifTitle;
   if (pushBodyEl) pushBodyEl.textContent = notifBody;
 
-  const flashTitle = document.getElementById('flash-title')?.value.trim() || '⚡ Flash Offer';
+  const flashTitle = document.getElementById('flash-title')?.value.trim() || 'Flash Offer';
   const flashBody = document.getElementById('flash-body')?.value.trim() || 'Upgrade to Elite Moksha for ₹99 and unlock unlimited AI Medicine Scanner!';
   const flashType = document.getElementById('flash-type')?.value || 'offer';
   const flashLink = document.getElementById('flash-link')?.value.trim() || '';
@@ -1602,19 +1602,19 @@ function updateLivePreview() {
   if (flashBodyEl) flashBodyEl.textContent = flashBody;
   if (flashBadgeEl) {
     if (flashType === 'offer') {
-      flashBadgeEl.textContent = '🎁 SPECIAL OFFER';
+      flashBadgeEl.textContent = 'SPECIAL OFFER';
       flashBadgeEl.style.background = 'rgba(251,191,36,0.2)';
       flashBadgeEl.style.color = '#fbbf24';
     } else if (flashType === 'info') {
-      flashBadgeEl.textContent = '📢 FEATURE RELEASE';
+      flashBadgeEl.textContent = 'FEATURE RELEASE';
       flashBadgeEl.style.background = 'rgba(56,189,248,0.2)';
       flashBadgeEl.style.color = '#38bdf8';
     } else if (flashType === 'warning') {
-      flashBadgeEl.textContent = '⚠️ MAINTENANCE';
+      flashBadgeEl.textContent = 'MAINTENANCE';
       flashBadgeEl.style.background = 'rgba(248,113,113,0.2)';
       flashBadgeEl.style.color = '#f87171';
     } else {
-      flashBadgeEl.textContent = '🚨 SYSTEM ALERT';
+      flashBadgeEl.textContent = 'SYSTEM ALERT';
       flashBadgeEl.style.background = 'rgba(248,113,113,0.3)';
       flashBadgeEl.style.color = '#f87171';
     }
@@ -1627,29 +1627,29 @@ function updateLivePreview() {
 function applyNotifPreset(key) {
   if (key === 'dose') {
     switchNotifTab('push');
-    document.getElementById('notif-title').value = '💊 Evening Medication Reminder';
+    document.getElementById('notif-title').value = 'Evening Medication Reminder';
     document.getElementById('notif-body').value = "It's time for your scheduled 8:00 PM doses! Open PillCare to record medication adherence.";
     document.getElementById('notif-target-filter').value = 'all';
   } else if (key === 'feature') {
     switchNotifTab('push');
-    document.getElementById('notif-title').value = '✨ AI Rx Scanner 2.0 Live!';
+    document.getElementById('notif-title').value = 'AI Rx Scanner 2.0 Live!';
     document.getElementById('notif-body').value = 'Snap a photo of your prescription doctor slip to auto-import dosages & pill schedules in 2 seconds!';
     document.getElementById('notif-target-filter').value = 'all';
   } else if (key === 'offer') {
     switchNotifTab('flash');
-    document.getElementById('flash-title').value = '🎁 Weekend Upgrade Discount 50% OFF';
+    document.getElementById('flash-title').value = 'Weekend Upgrade Discount 50% OFF';
     document.getElementById('flash-body').value = 'Upgrade to Elite Moksha Annual Plan for just ₹99/mo and unlock unlimited family pill tracking!';
     document.getElementById('flash-type').value = 'offer';
     document.getElementById('flash-target').value = 'free';
     document.getElementById('flash-link').value = 'https://pillcare.in/upgrade';
   } else if (key === 'tip') {
     switchNotifTab('push');
-    document.getElementById('notif-title').value = '🩺 Daily Health Insight';
+    document.getElementById('notif-title').value = 'Daily Health Insight';
     document.getElementById('notif-body').value = 'Taking your vitamins after meals increases absorption by up to 40%. Stay healthy with PillCare!';
     document.getElementById('notif-target-filter').value = 'all';
   } else if (key === 'alert') {
     switchNotifTab('flash');
-    document.getElementById('flash-title').value = '⚠️ System Maintenance Window';
+    document.getElementById('flash-title').value = 'System Maintenance Window';
     document.getElementById('flash-body').value = 'PillCare services will undergo brief scheduled infrastructure maintenance tonight at 2:00 AM IST.';
     document.getElementById('flash-type').value = 'warning';
     document.getElementById('flash-target').value = 'all';
@@ -1702,7 +1702,7 @@ async function sendNotification() {
     resultBox.style.color = 'var(--ac)';
     resultBox.style.background = 'rgba(145,132,217,0.1)';
     resultBox.style.borderColor = 'rgba(145,132,217,0.3)';
-    resultBox.textContent = '⏳ Querying device push tokens & dispatching Expo broadcast...';
+    resultBox.textContent = 'Querying device push tokens & dispatching Expo broadcast...';
   }
 
   try {
@@ -1716,7 +1716,7 @@ async function sendNotification() {
       resultBox.style.color = 'var(--gr)';
       resultBox.style.background = 'rgba(74,222,128,0.1)';
       resultBox.style.borderColor = 'rgba(74,222,128,0.3)';
-      resultBox.textContent = `✅ Push Notification Dispatched! Delivered: ${res.sent ?? 0} devices | Failed: ${res.failed ?? 0} | Total: ${res.total ?? 0}`;
+      resultBox.textContent = `Push Notification Dispatched! Delivered: ${res.sent ?? 0} devices | Failed: ${res.failed ?? 0} | Total: ${res.total ?? 0}`;
     }
     document.getElementById('notif-title').value = '';
     document.getElementById('notif-body').value = '';
@@ -1728,7 +1728,7 @@ async function sendNotification() {
       resultBox.style.color = 'var(--gr)';
       resultBox.style.background = 'rgba(74,222,128,0.1)';
       resultBox.style.borderColor = 'rgba(74,222,128,0.3)';
-      resultBox.textContent = `✅ Push Notification Broadcast dispatched to active device tokens! (${e.message})`;
+      resultBox.textContent = `Push Notification Broadcast dispatched to active device tokens! (${e.message})`;
     }
   }
 }
@@ -1752,10 +1752,7 @@ async function publishFlashAnnouncement() {
       body: JSON.stringify({ title, body, type, target_plan, action_link: link_url || undefined, link_url: link_url || undefined })
     });
     endProgress(true);
-    alert(`⚡ In-App Flash Announcement published live!
-
-Title: ${title}
-Target: ${target_plan.toUpperCase()}`);
+    alert(`In-App Flash Announcement published live!\n\nTitle: ${title}\nTarget: ${target_plan.toUpperCase()}`);
     document.getElementById('flash-title').value = '';
     document.getElementById('flash-body').value = '';
     document.getElementById('flash-link').value = '';
@@ -1763,7 +1760,7 @@ Target: ${target_plan.toUpperCase()}`);
     await loadNotifications();
   } catch (e) {
     endProgress(false);
-    alert(`⚡ Flash Announcement Created! (${e.message})`);
+    alert(`Flash Announcement Created! (${e.message})`);
     await loadAnnouncements();
     await loadNotifications();
   }
