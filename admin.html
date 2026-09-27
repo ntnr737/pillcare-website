@@ -1877,7 +1877,8 @@ async function loadUsers() {
     data={users: FALLBACK.users};
   }
   allUsers=data.users||[];
-  renderUsers(allUsers);
+  currentStatusFilter = 'all';
+  filterUsersByStatus('all');
 }
 
 function planPill(p, c) {
@@ -1888,21 +1889,21 @@ function planPill(p, c) {
 let currentStatusFilter = 'all';
 
 function getUserOnlineStatus(u) {
-  if (u.is_online || u.online_status === 'online') return 'online';
+  if (u.is_online === true || u.online_status === 'online') return 'online';
   if (u.online_status === 'idle') return 'idle';
   
-  const lastActive = u.last_login || u.last_active || u.updated_at;
+  const lastActive = u.last_login || u.last_active || u.last_active_at || u.updated_at || u.created_at;
   if (!lastActive) return 'offline';
   
   const diffMins = Math.floor((Date.now() - new Date(lastActive).getTime()) / 60000);
-  if (diffMins < 5) return 'online';
-  if (diffMins < 30) return 'idle';
+  if (diffMins < 15) return 'online';
+  if (diffMins < 120) return 'idle';
   return 'offline';
 }
 
 function getStatusBadgeMarkup(u) {
   const status = getUserOnlineStatus(u);
-  const lastActive = u.last_login || u.last_active || u.updated_at;
+  const lastActive = u.last_login || u.last_active || u.last_active_at || u.updated_at;
   const diffMs = lastActive ? (Date.now() - new Date(lastActive).getTime()) : Infinity;
   const diffMins = Math.floor(diffMs / 60000);
 
@@ -1961,7 +1962,7 @@ function filterUsersByStatus(status) {
 function applyUserFilters() {
   const q = (document.querySelector('#pg-users input[type="search"]')?.value || '').toLowerCase();
   const filtered = allUsers.filter(u => {
-    const matchesQuery = (u.nickname||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || (u.location||'').toLowerCase().includes(q);
+    const matchesQuery = (u.nickname||u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || (u.location||'').toLowerCase().includes(q);
     const status = getUserOnlineStatus(u);
     let matchesStatus = true;
     if (currentStatusFilter === 'online') matchesStatus = (status === 'online');
@@ -1969,7 +1970,7 @@ function applyUserFilters() {
     else if (currentStatusFilter === 'offline') matchesStatus = (status === 'offline');
     return matchesQuery && matchesStatus;
   });
-  renderUsers(filtered, false);
+  renderUsers(filtered, true);
 }
 
 function filterUsers(q) {
@@ -2000,7 +2001,7 @@ function renderUsers(list, updateCounts = true) {
 
   table.innerHTML = list.length
     ? list.map(u => `<tr>
-        <td><strong>${u.nickname||'—'}</strong></td>
+        <td><strong>${u.nickname||u.name||'—'}</strong></td>
         <td style="color:var(--tm);font-size:12px">${u.email||''}</td>
         <td>${getStatusBadgeMarkup(u)}</td>
         <td style="font-size:12px;color:var(--tm)">${u.location||'—'}</td>
@@ -2008,9 +2009,9 @@ function renderUsers(list, updateCounts = true) {
         <td style="text-align:center">${u.doses_taken||0} taken</td>
         <td>${planPill(u.plan, u.billing_cycle)}</td>
         <td style="font-size:11px;color:var(--tm)">${u.last_login ? formatRelativeTime(u.last_login) : 'Never'}</td>
-        <td><button class="btn" onclick="openModal('${u.user_id}','${(u.nickname||'User').replace(/'/g,'')}','${u.plan||'free'}')">Manage</button></td>
+        <td><button class="btn" onclick="openModal('${u.user_id}','${(u.nickname||u.name||'User').replace(/'/g,'')}','${u.plan||'free'}')">Manage</button></td>
       </tr>`).join('')
-    : '<tr><td colspan="9" class="empty">No users found matching current filters</td></tr>';
+    : `<tr><td colspan="9" class="empty">No users found matching filter "${currentStatusFilter}"</td></tr>`;
 }
 
 async function loadSubs(plan) {
