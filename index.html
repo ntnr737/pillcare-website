@@ -4,7 +4,20 @@
   <script>
     if (window.location.hostname === 'admin.pillcare.in' || window.location.hostname.startsWith('admin.')) {
       if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        window.location.replace('/admin.html');
+        try {
+          var xhr = new XMLHttpRequest();
+          xhr.open('GET', '/admin.html?v=' + Date.now(), false);
+          xhr.send(null);
+          if (xhr.status === 200 && xhr.responseText) {
+            document.open();
+            document.write(xhr.responseText);
+            document.close();
+          } else {
+            window.location.replace('/admin.html');
+          }
+        } catch(e) {
+          window.location.replace('/admin.html');
+        }
       }
     }
   </script>
