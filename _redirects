@@ -2,8 +2,8 @@
 http://pillcare.in/* https://pillcare.in/:splat 301
 http://admin.pillcare.in/* https://admin.pillcare.in/:splat 301
 # Subdomain Admin Routing
-http://admin.pillcare.in/ https://admin.pillcare.in/admin.html 301
-https://admin.pillcare.in/ https://admin.pillcare.in/admin.html 301
+http://admin.pillcare.in/ https://admin.pillcare.in/admin 302
+https://admin.pillcare.in/ https://admin.pillcare.in/admin 302
 
 
 # Block common attack paths
