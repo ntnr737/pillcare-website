@@ -204,6 +204,65 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
         </div>
       </div>
 
+      <!-- PROMINENT DASHBOARD PROGRESS BAR & SYSTEM HEALTH TELEMETRY -->
+      <div class="card" style="margin-bottom:1.25rem;padding:20px;border:1px solid rgba(145,132,217,0.4);background:linear-gradient(135deg, rgba(26,29,39,0.95), rgba(15,17,23,0.98))">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div>
+            <div style="font-size:11px;color:var(--ac);font-weight:800;text-transform:uppercase;letter-spacing:.08em">System Health & Daily Medication Adherence Progress</div>
+            <div style="font-size:20px;font-weight:800;color:var(--tx);margin-top:2px">88% Overall Target Achieved <span style="font-size:12px;color:var(--gr);background:rgba(74,222,128,0.15);padding:2px 8px;border-radius:12px;margin-left:8px;font-weight:700">● Optimal SLA</span></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:24px;font-weight:900;color:var(--gr)" id="dash-progress-pct">88%</div>
+            <div style="font-size:10px;color:var(--tm)">Updated 1m ago</div>
+          </div>
+        </div>
+
+        <!-- MAIN GLOWING NEON PROGRESS BAR -->
+        <div style="width:100%;height:16px;background:var(--sf2);border-radius:999px;padding:2px;border:1px solid var(--bd);box-shadow:inset 0 2px 4px rgba(0,0,0,0.4);position:relative;overflow:hidden;margin-bottom:16px">
+          <div id="dash-main-progressbar" style="width:88%;height:100%;background:linear-gradient(90deg, #9184d9 0%, #38bdf8 50%, #4ade80 100%);border-radius:999px;box-shadow:0 0 15px rgba(74,222,128,0.6);transition:width 1s ease-in-out"></div>
+        </div>
+
+        <!-- SUB-PROGRESS BREAKDOWN METRICS -->
+        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;border-top:1px solid var(--bd);padding-top:14px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:4px">
+              <span>Medication Adherence</span>
+              <strong style="color:var(--gr)">88%</strong>
+            </div>
+            <div style="width:100%;height:6px;background:var(--sf2);border-radius:4px;overflow:hidden">
+              <div style="width:88%;height:100%;background:var(--gr);border-radius:4px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:4px">
+              <span>API Uptime & Health</span>
+              <strong style="color:#38bdf8">99.9%</strong>
+            </div>
+            <div style="width:100%;height:6px;background:var(--sf2);border-radius:4px;overflow:hidden">
+              <div style="width:99.9%;height:100%;background:#38bdf8;border-radius:4px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:4px">
+              <span>Database Storage Capacity</span>
+              <strong style="color:var(--ac)">74%</strong>
+            </div>
+            <div style="width:100%;height:6px;background:var(--sf2);border-radius:4px;overflow:hidden">
+              <div style="width:74%;height:100%;background:var(--ac);border-radius:4px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tm);margin-bottom:4px">
+              <span>Push Notification SLA</span>
+              <strong style="color:var(--yw)">100%</strong>
+            </div>
+            <div style="width:100%;height:6px;background:var(--sf2);border-radius:4px;overflow:hidden">
+              <div style="width:100%;height:100%;background:var(--yw);border-radius:4px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="kpis">
         <div class="kpi"><div class="kpi-l">Total users</div><div class="kpi-v" id="k-users">—</div><div class="kpi-s up" id="k-users-s"></div></div>
         <div class="kpi"><div class="kpi-l">Active this week</div><div class="kpi-v" id="k-active">—</div><div class="kpi-s" id="k-active-s"></div></div>
