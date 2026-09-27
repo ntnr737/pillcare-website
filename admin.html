@@ -991,17 +991,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
       </div>
     </div>
 
-    <!-- SECURITY -->
     <!-- NOTIFICATIONS & PUSH BROADCAST CONTROL CENTER -->
-        <div class="page" id="pg-notifications">
-      <div class="topbar">
-        <h2>📱 Push Notification & Live Broadcast Control Center</h2>
-        <div style="display:flex;gap:8px">
-          <button class="btn green" onclick="registerTestPushToken()">🧪 Add Test Push Token</button>
-          <button class="btn" onclick="loadNotifications()">↻ Refresh Telemetry</button>
-        </div>
-      </div>
-
     <div class="page" id="pg-notifications">
       <!-- TOP HEADER & REFRESH -->
       <div class="topbar">
@@ -2042,11 +2032,19 @@ async function loadLocation() {
   } catch(e) { data=FALLBACK.location; }
   const states=data.states||[];
   document.getElementById('state-table').innerHTML=states.length
-    ?states.map((s,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${s.state}</td><td>${s.users}</td></tr>`).join('')
+    ?states.map((s,i)=>{
+        const stateName = s.state || s._id || 'Unknown';
+        const userCount = s.users || s.count || 0;
+        return `<tr><td style="color:var(--tm)">${i+1}</td><td>${stateName}</td><td>${userCount}</td></tr>`;
+      }).join('')
     :'<tr><td colspan="3" class="empty">No location data yet</td></tr>';
   const cities=data.cities||[];
   document.getElementById('city-table').innerHTML=cities.length
-    ?cities.map((c,i)=>`<tr><td style="color:var(--tm)">${i+1}</td><td>${c.city}</td><td>${c.users}</td></tr>`).join('')
+    ?cities.map((c,i)=>{
+        const cityName = c.city || (typeof c._id === 'object' ? (c._id?.city || c._id?.state) : c._id) || 'Unknown';
+        const userCount = c.users || c.count || 0;
+        return `<tr><td style="color:var(--tm)">${i+1}</td><td>${cityName}</td><td>${userCount}</td></tr>`;
+      }).join('')
     :'<tr><td colspan="3" class="empty">No city data yet</td></tr>';
 }
 
@@ -2055,13 +2053,21 @@ async function loadDevices() {
   try {
     data=await req('/admin/analytics/devices');
   } catch(e) { data=FALLBACK.devices; }
-  const os=data.os||[];
+  const os=data.os||data.os_versions||data.brands||[];
   document.getElementById('os-table').innerHTML=os.length
-    ?os.map(o=>`<tr><td>${o.os}</td><td>${o.count}</td></tr>`).join('')
+    ?os.map(o=>{
+        const osName = o.os || o.brand || o._id || 'Android';
+        const count = o.count || o.users || 0;
+        return `<tr><td>${osName}</td><td>${count}</td></tr>`;
+      }).join('')
     :'<tr><td colspan="2" class="empty">No device data yet</td></tr>';
-  const ver=data.app_versions||[];
+  const ver=data.app_versions||data.models||[];
   document.getElementById('ver-table').innerHTML=ver.length
-    ?ver.map(v=>`<tr><td>v${v.version}</td><td>${v.count}</td></tr>`).join('')
+    ?ver.map(v=>{
+        const verStr = v.version ? (v.version.startsWith('v') ? v.version : 'v'+v.version) : (v.model || v._id || 'v1.0.16');
+        const count = v.count || 0;
+        return `<tr><td>${verStr}</td><td>${count}</td></tr>`;
+      }).join('')
     :'<tr><td colspan="2" class="empty">No version data yet</td></tr>';
 }
 
