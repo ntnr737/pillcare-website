@@ -1320,6 +1320,7 @@ input[type=search]{width:220px;padding:7px 12px;background:var(--sf2);border:1px
 
 let activeRequests = 0;
 let progressStartTime = 0;
+let progressSafetyTimer = null;
 
 function startProgress(msg) {
   activeRequests++;
@@ -1335,13 +1336,26 @@ function startProgress(msg) {
     bar.style.background = 'linear-gradient(90deg, #9184d9, #4ade80, #38bdf8)';
     setTimeout(() => { if (activeRequests > 0) bar.style.width = '80%'; }, 250);
   }
+  
+  if (progressSafetyTimer) clearTimeout(progressSafetyTimer);
+  progressSafetyTimer = setTimeout(() => {
+    activeRequests = 0;
+    const n = document.getElementById('pageLoadingNotice');
+    const b = document.getElementById('topProgressBar');
+    if (n) n.style.display = 'none';
+    if (b) {
+      b.style.width = '100%';
+      setTimeout(() => { b.style.opacity = '0'; }, 300);
+    }
+  }, 1800);
 }
 
 function endProgress(success = true) {
   activeRequests = Math.max(0, activeRequests - 1);
   if (activeRequests === 0) {
+    if (progressSafetyTimer) { clearTimeout(progressSafetyTimer); progressSafetyTimer = null; }
     const elapsed = Date.now() - progressStartTime;
-    const remainingTime = Math.max(0, 750 - elapsed); // Enforce minimum 750ms visible loading duration
+    const remainingTime = Math.max(0, 300 - elapsed);
     
     setTimeout(() => {
       const bar = document.getElementById('topProgressBar');
@@ -1355,8 +1369,8 @@ function endProgress(success = true) {
           setTimeout(() => {
             bar.style.width = '0%';
             bar.style.background = 'linear-gradient(90deg, #9184d9, #4ade80, #38bdf8)';
-          }, 400);
-        }, 350);
+          }, 300);
+        }, 250);
       }
     }, remainingTime);
   }
@@ -1688,9 +1702,16 @@ function go(id, el) {
   };
 
   if (loaders[id]) {
-    Promise.resolve(loaders[id]()).finally(() => {
+    try {
+      Promise.resolve(loaders[id]()).catch(err => {
+        console.warn('Tab loader warning for ' + id + ':', err);
+      }).finally(() => {
+        endProgress(true);
+      });
+    } catch(err) {
+      console.warn('Sync loader warning for ' + id + ':', err);
       endProgress(true);
-    });
+    }
   } else {
     endProgress(true);
   }
