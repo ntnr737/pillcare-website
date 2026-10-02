@@ -1,3 +1,17 @@
+# Root Subpath Redirects to /admin/
+/analytics/* /admin/analytics/:splat 301
+/app-control/* /admin/app-control/:splat 301
+/ai/* /admin/ai/:splat 301
+/engagement/* /admin/engagement/:splat 301
+/users/* /admin/users/:splat 301
+/finance/* /admin/finance/:splat 301
+/reports/* /admin/reports/:splat 301
+/audit-log/* /admin/audit-log/:splat 301
+/settings/* /admin/settings/:splat 301
+/system/* /admin/system/:splat 301
+/content/* /admin/content/:splat 301
+/dashboard/* /admin/dashboard/:splat 301
+
 # Subdomain Admin Rewrites for admin.pillcare.in
 https://admin.pillcare.in/ /admin/index.html 200
 https://admin.pillcare.in/* /admin/:splat 200
@@ -11,5 +25,6 @@ http://admin.pillcare.in/* https://admin.pillcare.in/:splat 301
 /wp-login.php /404 403
 /.env /404 403
 /admin/config/* /404 403
+
 
 
