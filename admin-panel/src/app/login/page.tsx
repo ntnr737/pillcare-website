@@ -5,6 +5,8 @@ import { Pill, ShieldCheck, Lock, Mail, Key, AlertTriangle, ArrowRight, CheckCir
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
+const BACKEND_URL = (process.env.NEXT_PUBLIC_PILLCARE_BACKEND_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app').replace(/\/$/, '');
+
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [step, setStep] = useState<'credentials' | 'totp'>('credentials');
   const [totpCode, setTotpCode] = useState('');
+  const [challenge, setChallenge] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -27,9 +30,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/admin/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'credentials', email, password }) });
+      const response = await fetch(`${BACKEND_URL}/api/admin/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'credentials', email, password }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Authentication failed.');
+      setChallenge(data.challenge);
       setStep('totp');
     } catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Authentication failed.'); }
     finally { setLoading(false); }
@@ -44,10 +48,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/admin/session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'totp', code: totpCode }) });
+      const response = await fetch(`${BACKEND_URL}/api/admin/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'totp', challenge, code: totpCode }) });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Two-factor verification failed.');
-      login(data.user, 'http-only-session');
+      login(data.user, data.token);
       router.push('/dashboard');
     } catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Two-factor verification failed.'); }
     finally { setLoading(false); }
