@@ -9,6 +9,7 @@ import {
   MedicationRecord,
   GroqTelemetry,
   NotificationCampaign,
+  CMSContentRecord,
   InfrastructureItem,
   AuditLogRecord,
 } from '@/types/admin';
@@ -22,6 +23,7 @@ import {
   INITIAL_MEDICATIONS,
   INITIAL_GROQ_TELEMETRY,
   INITIAL_NOTIFICATION_CAMPAIGNS,
+  INITIAL_CMS_CONTENT,
   INITIAL_INFRASTRUCTURE,
   INITIAL_AUDIT_LOGS,
 } from '@/lib/data/mockData';
@@ -135,17 +137,116 @@ export async function updateUserSubscription(userId: string, plan: string, billi
   }
 }
 
-export async function sendBroadcastPushNotification(title: string, body: string, targetPlan?: string): Promise<boolean> {
+export interface BroadcastResult {
+  ok: boolean;
+  campaign_id?: string;
+  sent?: number;
+  failed?: number;
+  total_tokens?: number;
+  cohort?: string;
+  in_app?: boolean;
+  message?: string;
+  error?: string;
+}
+
+export async function sendBroadcastPushNotification(
+  title: string,
+  body: string,
+  targetPlan?: string,
+  extra?: { routeKey?: string; channels?: string[] }
+): Promise<BroadcastResult> {
   try {
     const res = await adminFetch('admin/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, body, plan: targetPlan }),
+      body: JSON.stringify({
+        title,
+        body,
+        target_plan: targetPlan || 'all',
+        target: targetPlan || 'all',
+        plan: targetPlan || 'all',
+        targetAudience: targetPlan || 'all',
+        route_key: extra?.routeKey,
+        channels: extra?.channels || ['push', 'in_app'],
+      }),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      return { ok: false, error: `HTTP ${res.status}: ${errText || res.statusText}` };
+    }
+    const json = await res.json();
+    return {
+      ok: true,
+      campaign_id: json.campaign_id,
+      sent: json.sent ?? 0,
+      failed: json.failed ?? 0,
+      total_tokens: json.total_tokens ?? 0,
+      cohort: json.cohort,
+      in_app: json.in_app,
+      message: json.message,
+    };
+  } catch (e: any) {
+    console.error('Push notification broadcast failed:', e);
+    return { ok: false, error: e?.message || 'Network error connecting to backend' };
+  }
+}
+
+export async function fetchCMSContent(): Promise<CMSContentRecord[]> {
+  try {
+    const res = await adminFetch('admin/announcements');
+    if (res.ok) {
+      const json = await res.json();
+      if (Array.isArray(json) && json.length > 0) {
+        return json.map((item: any) => ({
+          id: item.id || String(item._id),
+          title: item.title,
+          type: (item.type || 'announcement') as any,
+          status: item.status || (item.active ? 'Published' : 'Unpublished'),
+          version: item.version || 1,
+          author: item.author || 'PillCare Medical Admin',
+          targetPlan: item.target_plan || item.target || 'all',
+          updatedAt: item.created_at || item.updated_at || new Date().toISOString(),
+          content: item.body || item.content || '',
+        }));
+      }
+    }
+  } catch (e) {}
+  return INITIAL_CMS_CONTENT;
+}
+
+export async function updateCMSStatus(id: string, status: 'Published' | 'Unpublished'): Promise<boolean> {
+  try {
+    const res = await adminFetch(`admin/announcements/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
     });
     return res.ok;
   } catch (e) {
-    console.error('Push notification request failed:', e);
     return false;
+  }
+}
+
+export async function createCMSAnnouncement(payload: {
+  title: string;
+  body: string;
+  type?: string;
+  target_plan?: string;
+  action_link?: string;
+}): Promise<{ ok: boolean; id?: string; error?: string }> {
+  try {
+    const res = await adminFetch('admin/announcements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      return { ok: false, error: await res.text() };
+    }
+    const json = await res.json();
+    return { ok: true, id: json.id };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || 'Network error' };
   }
 }
 
@@ -170,6 +271,15 @@ export async function fetchGroqTelemetry(): Promise<GroqTelemetry> {
 }
 
 export async function fetchNotifications(): Promise<NotificationCampaign[]> {
+  try {
+    const res = await adminFetch('admin/notifications');
+    if (res.ok) {
+      const json = await res.json();
+      if (json.notifications && Array.isArray(json.notifications) && json.notifications.length > 0) {
+        return json.notifications;
+      }
+    }
+  } catch (e) {}
   return INITIAL_NOTIFICATION_CAMPAIGNS;
 }
 

@@ -33,34 +33,47 @@ export default function NotificationsPage() {
     fetchNotifications().then(setCampaigns);
   }, []);
 
-  const handleTriggerSend = () => {
+  const handleTriggerSend = async () => {
     if (!canSend) {
       setToastMsg('Permission Denied: notifications.send authorization required.');
       return;
     }
     setSending(true);
-    setTimeout(async () => {
-      await sendBroadcastPushNotification(title, body, targetAudience);
+    try {
+      const res = await sendBroadcastPushNotification(title, body, targetAudience);
       setSending(false);
       setConfirmSendModal(false);
-      const newCamp: NotificationCampaign = {
-        id: `notif_${Date.now()}`,
-        title,
-        body,
-        channels: ['push'],
-        targetAudience,
-        sentAt: new Date().toISOString(),
-        status: 'sent',
-        sentCount: targetAudience === 'all' ? 168400 : 142000,
-        openRatePercent: 0.0,
-        clickRatePercent: 0.0,
-        createdBy: 'admin@pillcare.in',
-      };
-      setCampaigns([newCamp, ...campaigns]);
-      setTitle('');
-      setBody('');
-      setToastMsg(`Push notification broadcast dispatched to target audience (${newCamp.sentCount.toLocaleString()} devices).`);
-    }, 1000);
+      if (res.ok) {
+        const actualSent = res.sent ?? 0;
+        const newCamp: NotificationCampaign = {
+          id: res.campaign_id || `cmp_${Date.now()}`,
+          title,
+          body,
+          channels: ['push'],
+          targetAudience,
+          sentAt: new Date().toISOString(),
+          status: 'sent',
+          sentCount: actualSent,
+          openRatePercent: 0.0,
+          clickRatePercent: 0.0,
+          createdBy: 'admin@pillcare.in',
+        };
+        setCampaigns([newCamp, ...campaigns]);
+        setTitle('');
+        setBody('');
+        setToastMsg(
+          res.message ||
+            `Broadcast dispatched: ${actualSent} device(s) reached in cohort '${targetAudience}'.`
+        );
+      } else {
+        // FL-03: On failure, keep the form values, show error reason, and allow safe retry
+        setToastMsg(`Broadcast Error: ${res.error || 'Failed to dispatch push notifications'}. Form preserved.`);
+      }
+    } catch (e: any) {
+      setSending(false);
+      setConfirmSendModal(false);
+      setToastMsg(`Broadcast Error: ${e?.message || 'Network error'}. Form preserved.`);
+    }
   };
 
   return (
@@ -114,10 +127,10 @@ export default function NotificationsPage() {
               disabled={!canCreate}
               className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 font-medium focus:outline-none"
             >
-              <option value="all">All Active Users (168,400 Devices)</option>
-              <option value="free_users">Free Tier Users (142,000 Devices)</option>
-              <option value="premium_users">Premium Subscribers (2,480 Devices)</option>
-              <option value="inactive_7d">Inactive for 7 Days (12,400 Devices)</option>
+              <option value="all">All Active App Users</option>
+              <option value="free_users">Free Tier Patients</option>
+              <option value="premium_users">Premium Subscribers</option>
+              <option value="inactive_7d">Inactive Users (Last 7 Days)</option>
             </select>
           </div>
         </div>
@@ -145,6 +158,45 @@ export default function NotificationsPage() {
             }`}
           >
             <Send className="w-4 h-4" /> Send Mass Notification Broadcast
+          </button>
+        </div>
+      </div>
+
+      {/* Device Push Token QC Debugger Card */}
+      <div className="p-6 rounded-3xl glass-card border border-indigo-500/30 bg-indigo-950/20 space-y-3 text-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-indigo-400 font-bold text-sm">
+            <Sparkles className="w-4 h-4" /> Device Push Token QC & Diagnostic Debugger
+          </div>
+          <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[10px]">
+            Expo & FCM Gateway Active
+          </span>
+        </div>
+        <p className="text-slate-300">
+          Build v1.50 sends push tokens to <code className="text-sky-400 font-mono">/push-token</code> when opened. You can also paste your phone's push token below to send a live push payload directly to your device.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
+          <input
+            type="text"
+            placeholder="Paste your device Push Token (e.g. ExponentPushToken[...])"
+            id="manualPushTokenInput"
+            className="flex-1 w-full p-2.5 rounded-xl bg-slate-900 border border-slate-800 focus:border-indigo-500 text-slate-100 font-mono"
+          />
+          <button
+            onClick={async () => {
+              const el = document.getElementById('manualPushTokenInput') as HTMLInputElement;
+              const val = el?.value?.trim() || '';
+              if (val) {
+                const { registerTestPushToken } = await import('@/lib/api/client');
+                const ok = await registerTestPushToken(val);
+                setToastMsg(ok ? '✅ Push Token registered successfully! Click Send Broadcast above to test your device.' : 'Failed to register token');
+              } else {
+                setToastMsg('Please paste a valid push token string first.');
+              }
+            }}
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shrink-0"
+          >
+            Register Device Token
           </button>
         </div>
       </div>
