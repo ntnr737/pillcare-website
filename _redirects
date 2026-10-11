@@ -2,7 +2,7 @@
 /admin.html /admin/ 301
 /admin /admin/ 301
 
-# Root Subpath Redirects to /admin/
+# Root subpath redirects to /admin/
 /analytics/* /admin/analytics/:splat 301
 /app-control/* /admin/app-control/:splat 301
 /ai/* /admin/ai/:splat 301
@@ -16,19 +16,5 @@
 /content/* /admin/content/:splat 301
 /dashboard/* /admin/dashboard/:splat 301
 
-# Subdomain Admin Rewrites for admin.pillcare.in
-https://admin.pillcare.in/ /admin/index.html 200
-https://admin.pillcare.in/* /admin/:splat 200
-
-# Force HTTPS for pillcare.in
-http://pillcare.in/* https://pillcare.in/:splat 301
-http://admin.pillcare.in/* https://admin.pillcare.in/:splat 301
-
-# Block common attack paths
-/wp-admin/* /404 403
-/wp-login.php /404 403
-/.env /404 403
-/admin/config/* /404 403
-
-
-
+# Host-based admin routing, HTTPS enforcement, and security blocks
+# are handled by worker.js because _redirects only supports path rules.
