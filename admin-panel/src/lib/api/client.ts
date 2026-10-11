@@ -28,7 +28,7 @@ import {
 const BACKEND_URL = '/api/admin/backend';
 
 async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const response = await fetch(`${BACKEND_URL}/${path.replace(/^\\/+/, '')}`, { ...init, cache: 'no-store', credentials: 'same-origin' });
+  const response = await fetch(`${BACKEND_URL}/${path.replace(/^\/+/, '')}`, { ...init, cache: 'no-store', credentials: 'same-origin' });
   if (response.status === 401) throw new Error('Admin session expired. Please sign in again.');
   return response;
 }
@@ -75,9 +75,7 @@ export async function fetchGTMConfig(): Promise<{ data: GTMContainerConfig; isCo
 
 export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary; source: string }> {
   try {
-    const res = await adminFetch('admin/revenue', {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
-    });
+    const res = await adminFetch('admin/revenue');
     if (res.ok) {
       const json = await res.json();
       return {
@@ -95,9 +93,7 @@ export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary;
 
 export async function fetchPillCareUsers(): Promise<PillCareUserRecord[]> {
   try {
-    const res = await adminFetch('admin/users?limit=100', {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
-    });
+    const res = await adminFetch('admin/users?limit=100');
     if (res.ok) {
       const json = await res.json();
       if (json.users && json.users.length > 0) {
@@ -139,10 +135,7 @@ export async function sendBroadcastPushNotification(title: string, body: string,
   try {
     const res = await adminFetch('admin/notify', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': 'pillcare_admin_secret_key_2026',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, body, plan: targetPlan }),
     });
     return res.ok;
