@@ -53,10 +53,7 @@ export function getStoredAdminSession(): { user: AdminUser | null; token: string
     const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
     const token = localStorage.getItem(ADMIN_TOKEN_KEY);
     if (!raw) {
-      // Default auto-login as SUPER_ADMIN for production-grade demo state
-      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(DEFAULT_ADMIN));
-      localStorage.setItem(ADMIN_TOKEN_KEY, 'pillcare_sys_jwt_token_2026');
-      return { user: DEFAULT_ADMIN, token: 'pillcare_sys_jwt_token_2026' };
+      return { user: null, token: null };
     }
     return { user: JSON.parse(raw), token };
   } catch (e) {
