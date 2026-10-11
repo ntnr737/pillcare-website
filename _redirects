@@ -1,3 +1,7 @@
+# Admin root & HTML aliases
+/admin.html /admin/ 301
+/admin /admin/ 301
+
 # Root Subpath Redirects to /admin/
 /analytics/* /admin/analytics/:splat 301
 /app-control/* /admin/app-control/:splat 301
