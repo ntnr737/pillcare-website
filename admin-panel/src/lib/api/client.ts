@@ -1,3 +1,4 @@
+import { getStoredAdminSession } from '@/lib/auth/session';
 import {
   ExecutiveKPIs,
   GA4AnalyticsData,
@@ -25,12 +26,21 @@ import {
   INITIAL_AUDIT_LOGS,
 } from '@/lib/data/mockData';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app';
+const BACKEND_URL = (process.env.NEXT_PUBLIC_PILLCARE_BACKEND_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app').replace(/\/$/, '');
+
+async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const { token } = getStoredAdminSession();
+  const headers = new Headers(init.headers);
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  const response = await fetch(`${BACKEND_URL}/api/${path.replace(/^\/+/, '')}`, { ...init, headers, cache: 'no-store', credentials: 'omit' });
+  if (response.status === 401) throw new Error('Admin session expired. Please sign in again.');
+  return response;
+}
 
 export async function fetchExecutiveKPIs(): Promise<{ data: ExecutiveKPIs; source: string }> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/stats`, {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
+    const res = await adminFetch('admin/stats', {
+      
       next: { revalidate: 30 },
     });
     if (res.ok) {
@@ -69,9 +79,7 @@ export async function fetchGTMConfig(): Promise<{ data: GTMContainerConfig; isCo
 
 export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary; source: string }> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/revenue`, {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
-    });
+    const res = await adminFetch('admin/revenue');
     if (res.ok) {
       const json = await res.json();
       return {
@@ -89,9 +97,7 @@ export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary;
 
 export async function fetchPillCareUsers(): Promise<PillCareUserRecord[]> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/users?limit=100`, {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
-    });
+    const res = await adminFetch('admin/users?limit=100');
     if (res.ok) {
       const json = await res.json();
       if (json.users && json.users.length > 0) {
@@ -117,38 +123,42 @@ export async function fetchPillCareUsers(): Promise<PillCareUserRecord[]> {
 
 export async function updateUserSubscription(userId: string, plan: string, billingCycle: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/users/${userId}/subscription`, {
+    const res = await adminFetch(`admin/users/${encodeURIComponent(userId)}/subscription`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': 'pillcare_admin_secret_key_2026',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan, billing_cycle: billingCycle, expires_days: 365 }),
     });
     return res.ok;
   } catch (e) {
-    return true; // Optimistic update
+    console.error('Subscription update failed:', e);
+    return false;
   }
 }
 
 export async function sendBroadcastPushNotification(title: string, body: string, targetPlan?: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/notify`, {
+    const res = await adminFetch('admin/notify', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': 'pillcare_admin_secret_key_2026',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, body, plan: targetPlan }),
     });
     return res.ok;
   } catch (e) {
-    return true;
+    console.error('Push notification request failed:', e);
+    return false;
   }
 }
 
 export async function fetchFeatureFlags(): Promise<FeatureFlagRecord[]> {
-  return INITIAL_FEATURE_FLAGS;
+  const res = await adminFetch('admin/feature-flags');
+  if (!res.ok) throw new Error(`Feature flag load failed (${res.status})`);
+  return res.json();
+}
+
+export async function updateFeatureFlag(key: string, patch: Partial<Pick<FeatureFlagRecord, 'enabled' | 'rolloutPercentage' | 'countries' | 'platforms' | 'minAppVersion'>>): Promise<FeatureFlagRecord> {
+  const res = await adminFetch(`admin/feature-flags/${encodeURIComponent(key)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) });
+  if (!res.ok) throw new Error(`Feature flag update failed (${res.status}): ${await res.text()}`);
+  return res.json();
 }
 
 export async function fetchMedicationCatalog(): Promise<MedicationRecord[]> {

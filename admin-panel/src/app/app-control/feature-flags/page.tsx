@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Lock,
 } from 'lucide-react';
-import { fetchFeatureFlags } from '@/lib/api/client';
+import { fetchFeatureFlags, updateFeatureFlag } from '@/lib/api/client';
 import { FeatureFlagRecord } from '@/types/admin';
 import { useAuth } from '@/context/AuthContext';
 
@@ -27,7 +27,7 @@ export default function FeatureFlagsPage() {
   const canEdit = hasPermission('features.edit');
 
   useEffect(() => {
-    fetchFeatureFlags().then(setFlags);
+    fetchFeatureFlags().then(setFlags).catch((error) => setToastMsg(error instanceof Error ? error.message : 'Could not load live feature flags.'));
   }, []);
 
   const handleToggleClick = (flag: FeatureFlagRecord) => {
@@ -42,30 +42,31 @@ export default function FeatureFlagsPage() {
     }
   };
 
-  const executeToggle = (key: string) => {
-    setFlags((prev) =>
-      prev.map((f) => {
-        if (f.key === key) {
-          const updatedState = !f.enabled;
-          return {
-            ...f,
-            enabled: updatedState,
-            lastModifiedBy: 'admin@pillcare.in',
-            lastModifiedAt: new Date().toISOString(),
-          };
-        }
-        return f;
-      })
-    );
-    setConfirmFlag(null);
-    setToastMsg(`Feature flag ${key} successfully updated & audit logged.`);
+  const executeToggle = async (key: string) => {
+    const current = flags.find((flag) => flag.key === key);
+    if (!current) return;
+    const nextEnabled = !current.enabled;
+    try {
+      const updated = await updateFeatureFlag(key, { enabled: nextEnabled, rolloutPercentage: nextEnabled ? Math.max(current.rolloutPercentage, 100) : 0 });
+      setFlags((prev) => prev.map((flag) => flag.key === key ? updated : flag));
+      setConfirmFlag(null);
+      setToastMsg(`Feature flag ${key} saved to the backend.`);
+    } catch (error) {
+      setToastMsg(error instanceof Error ? error.message : 'Feature flag update failed; no change was saved.');
+    }
   };
 
-  const handleRolloutChange = (key: string, percent: number) => {
+  const handleRolloutChange = async (key: string, percent: number) => {
     if (!canEdit) return;
-    setFlags((prev) =>
-      prev.map((f) => (f.key === key ? { ...f, rolloutPercentage: percent } : f))
-    );
+    const current = flags.find((flag) => flag.key === key);
+    if (!current) return;
+    try {
+      const updated = await updateFeatureFlag(key, { rolloutPercentage: percent });
+      setFlags((prev) => prev.map((flag) => flag.key === key ? updated : flag));
+      setToastMsg(`Rollout for ${key} saved.`);
+    } catch (error) {
+      setToastMsg(error instanceof Error ? error.message : 'Rollout update failed; no change was saved.');
+    }
   };
 
   return (

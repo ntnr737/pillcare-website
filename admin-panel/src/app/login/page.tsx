@@ -4,20 +4,23 @@ import React, { useState } from 'react';
 import { Pill, ShieldCheck, Lock, Mail, Key, AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { DEFAULT_ADMIN } from '@/lib/auth/session';
+
+const BACKEND_URL = (process.env.NEXT_PUBLIC_PILLCARE_BACKEND_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app').replace(/\/$/, '');
+
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
   const [email, setEmail] = useState('admin@pillcare.in');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('');
   const [step, setStep] = useState<'credentials' | 'totp'>('credentials');
   const [totpCode, setTotpCode] = useState('');
+  const [challenge, setChallenge] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
       setErrorMsg('Please enter your administrator email address.');
@@ -26,13 +29,17 @@ export default function LoginPage() {
     setErrorMsg('');
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'credentials', email, password }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Authentication failed.');
+      setChallenge(data.challenge);
       setStep('totp');
-    }, 600);
+    } catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Authentication failed.'); }
+    finally { setLoading(false); }
   };
 
-  const handleTotpSubmit = (e: React.FormEvent) => {
+  const handleTotpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (totpCode.length < 6) {
       setErrorMsg('Please enter a valid 6-digit authenticator code.');
@@ -40,10 +47,14 @@ export default function LoginPage() {
     }
     setLoading(true);
 
-    setTimeout(() => {
-      login(DEFAULT_ADMIN, 'pillcare_sys_jwt_token_2026');
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/admin/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stage: 'totp', challenge, code: totpCode }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Two-factor verification failed.');
+      login(data.user, data.token);
       router.push('/dashboard');
-    }, 800);
+    } catch (error) { setErrorMsg(error instanceof Error ? error.message : 'Two-factor verification failed.'); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -118,10 +129,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => {
-                login(DEFAULT_ADMIN, 'pillcare_sys_jwt_token_2026');
-                router.push('/dashboard');
-              }}
+              onClick={() => setErrorMsg('Google SSO is not configured for this admin portal yet. Use administrator credentials and your authenticator code.')}
               className="w-full py-2.5 px-4 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 text-slate-200 text-xs font-medium transition-all flex items-center justify-center gap-2"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -149,7 +157,7 @@ export default function LoginPage() {
                   value={totpCode}
                   onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900/90 border border-slate-800 focus:border-sky-500 text-sm font-mono tracking-widest text-slate-100 focus:outline-none transition-colors"
-                  placeholder="123456"
+                  placeholder="Authenticator code"
                   maxLength={6}
                   autoFocus
                   required
