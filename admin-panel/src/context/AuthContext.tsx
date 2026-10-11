@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminUser, AdminRole, AdminPermission } from '@/types/admin';
-import { getStoredAdminSession, saveAdminSession, clearAdminSession, DEFAULT_ADMIN } from '@/lib/auth/session';
+import { getStoredAdminSession, saveAdminSession, clearAdminSession } from '@/lib/auth/session';
 import { hasPermission as checkRolePermission } from '@/lib/auth/rbac';
 
 interface AuthContextType {
@@ -28,9 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const { user: storedUser, token: storedToken } = getStoredAdminSession();
-    setUser(storedUser || DEFAULT_ADMIN);
-    setToken(storedToken || 'pillcare_sys_jwt_token_2026');
-    setIsLoading(false);
+    if (storedUser && storedToken) {
+      fetch('/api/admin/session', { cache: 'no-store' }).then(async (r) => {
+        if (!r.ok) { clearAdminSession(); setUser(null); setToken(null); return; }
+        const data = await r.json(); setUser(data.user); setToken('http-only-session');
+      }).catch(() => { clearAdminSession(); setUser(null); setToken(null); }).finally(() => setIsLoading(false));
+    } else { setUser(null); setToken(null); setIsLoading(false); }
   }, []);
 
   const login = (newUser: AdminUser, newToken: string) => {
@@ -43,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     clearAdminSession();
+    fetch('/api/admin/session', { method: 'DELETE' }).catch(() => {});
   };
 
   const revokeSession = (sessionId: string) => {
