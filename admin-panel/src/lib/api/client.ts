@@ -1,3 +1,4 @@
+import { getStoredAdminSession } from '@/lib/auth/session';
 import {
   ExecutiveKPIs,
   GA4AnalyticsData,
@@ -25,10 +26,13 @@ import {
   INITIAL_AUDIT_LOGS,
 } from '@/lib/data/mockData';
 
-const BACKEND_URL = '/api/admin/backend';
+const BACKEND_URL = (process.env.NEXT_PUBLIC_PILLCARE_BACKEND_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app').replace(/\/$/, '');
 
 async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const response = await fetch(`${BACKEND_URL}/${path.replace(/^\/+/, '')}`, { ...init, cache: 'no-store', credentials: 'same-origin' });
+  const { token } = getStoredAdminSession();
+  const headers = new Headers(init.headers);
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  const response = await fetch(`${BACKEND_URL}/api/${path.replace(/^\/+/, '')}`, { ...init, headers, cache: 'no-store', credentials: 'omit' });
   if (response.status === 401) throw new Error('Admin session expired. Please sign in again.');
   return response;
 }
