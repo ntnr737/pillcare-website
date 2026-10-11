@@ -25,12 +25,18 @@ import {
   INITIAL_AUDIT_LOGS,
 } from '@/lib/data/mockData';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app';
+const BACKEND_URL = '/api/admin/backend';
+
+async function adminFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const response = await fetch(`${BACKEND_URL}/${path.replace(/^\\/+/, '')}`, { ...init, cache: 'no-store', credentials: 'same-origin' });
+  if (response.status === 401) throw new Error('Admin session expired. Please sign in again.');
+  return response;
+}
 
 export async function fetchExecutiveKPIs(): Promise<{ data: ExecutiveKPIs; source: string }> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/stats`, {
-      headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
+    const res = await adminFetch('admin/stats', {
+      
       next: { revalidate: 30 },
     });
     if (res.ok) {
@@ -69,7 +75,7 @@ export async function fetchGTMConfig(): Promise<{ data: GTMContainerConfig; isCo
 
 export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary; source: string }> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/revenue`, {
+    const res = await adminFetch('admin/revenue', {
       headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
     });
     if (res.ok) {
@@ -89,7 +95,7 @@ export async function fetchFinancialSummary(): Promise<{ data: FinancialSummary;
 
 export async function fetchPillCareUsers(): Promise<PillCareUserRecord[]> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/users?limit=100`, {
+    const res = await adminFetch('admin/users?limit=100', {
       headers: { 'x-admin-secret': 'pillcare_admin_secret_key_2026' },
     });
     if (res.ok) {
@@ -117,23 +123,21 @@ export async function fetchPillCareUsers(): Promise<PillCareUserRecord[]> {
 
 export async function updateUserSubscription(userId: string, plan: string, billingCycle: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/users/${userId}/subscription`, {
+    const res = await adminFetch(`admin/users/${encodeURIComponent(userId)}/subscription`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-admin-secret': 'pillcare_admin_secret_key_2026',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan, billing_cycle: billingCycle, expires_days: 365 }),
     });
     return res.ok;
   } catch (e) {
-    return true; // Optimistic update
+    console.error('Subscription update failed:', e);
+    return false;
   }
 }
 
 export async function sendBroadcastPushNotification(title: string, body: string, targetPlan?: string): Promise<boolean> {
   try {
-    const res = await fetch(`${BACKEND_URL}/admin/notify`, {
+    const res = await adminFetch('admin/notify', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -143,12 +147,21 @@ export async function sendBroadcastPushNotification(title: string, body: string,
     });
     return res.ok;
   } catch (e) {
-    return true;
+    console.error('Push notification request failed:', e);
+    return false;
   }
 }
 
 export async function fetchFeatureFlags(): Promise<FeatureFlagRecord[]> {
-  return INITIAL_FEATURE_FLAGS;
+  const res = await adminFetch('admin/feature-flags');
+  if (!res.ok) throw new Error(`Feature flag load failed (${res.status})`);
+  return res.json();
+}
+
+export async function updateFeatureFlag(key: string, patch: Partial<Pick<FeatureFlagRecord, 'enabled' | 'rolloutPercentage' | 'countries' | 'platforms' | 'minAppVersion'>>): Promise<FeatureFlagRecord> {
+  const res = await adminFetch(`admin/feature-flags/${encodeURIComponent(key)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch) });
+  if (!res.ok) throw new Error(`Feature flag update failed (${res.status}): ${await res.text()}`);
+  return res.json();
 }
 
 export async function fetchMedicationCatalog(): Promise<MedicationRecord[]> {
