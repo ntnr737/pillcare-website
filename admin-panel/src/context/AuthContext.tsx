@@ -29,9 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const { user: storedUser, token: storedToken } = getStoredAdminSession();
     if (storedUser && storedToken) {
-      fetch('/api/admin/session', { cache: 'no-store' }).then(async (r) => {
+      const backendUrl = (process.env.NEXT_PUBLIC_PILLCARE_BACKEND_URL || 'https://pillcare-backend-1082668880575.europe-west1.run.app').replace(/\/$/, '');
+      fetch(`${backendUrl}/api/admin/auth/session`, { cache: 'no-store', headers: { Authorization: `Bearer ${storedToken}` } }).then(async (r) => {
         if (!r.ok) { clearAdminSession(); setUser(null); setToken(null); return; }
-        const data = await r.json(); setUser(data.user); setToken('http-only-session');
+        const data = await r.json(); setUser(data.user); setToken(storedToken);
       }).catch(() => { clearAdminSession(); setUser(null); setToken(null); }).finally(() => setIsLoading(false));
     } else { setUser(null); setToken(null); setIsLoading(false); }
   }, []);
@@ -46,7 +47,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     clearAdminSession();
-    fetch('/api/admin/session', { method: 'DELETE' }).catch(() => {});
   };
 
   const revokeSession = (sessionId: string) => {
