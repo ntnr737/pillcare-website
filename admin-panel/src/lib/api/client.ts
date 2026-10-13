@@ -39,7 +39,7 @@ async function adminFetch(path: string, init: RequestInit = {}): Promise<Respons
   return response;
 }
 
-export async function fetchExecutiveKPIs(): Promise<{ data: ExecutiveKPIs; source: string }> {
+export async function fetchExecutiveKPIs(): Promise<{ data: ExecutiveKPIs; source: string; isLive: boolean }> {
   try {
     const res = await adminFetch('admin/stats', {
       
@@ -50,17 +50,18 @@ export async function fetchExecutiveKPIs(): Promise<{ data: ExecutiveKPIs; sourc
       return {
         data: {
           ...INITIAL_EXECUTIVE_KPIS,
-          dau: json.dau_7d || json.dau || INITIAL_EXECUTIVE_KPIS.dau,
-          mau: json.mau_30d || json.total_users || INITIAL_EXECUTIVE_KPIS.mau,
-          remindersCompleted: json.doses_taken || INITIAL_EXECUTIVE_KPIS.remindersCompleted,
+          dau: json.dau_7d || json.dau || 0,
+          mau: json.mau_30d || json.total_users || 0,
+          remindersCompleted: json.doses_taken || 0,
         },
-        source: 'Live GCP FastAPI Backend + MongoDB',
+        source: 'Live GCP Backend + MongoDB',
+        isLive: true,
       };
     }
   } catch (e) {
     // Graceful fallback
   }
-  return { data: INITIAL_EXECUTIVE_KPIS, source: 'Production Database Snapshot' };
+  return { data: INITIAL_EXECUTIVE_KPIS, source: 'Offline / Standby Snapshot', isLive: false };
 }
 
 export async function fetchGA4Analytics(): Promise<{ data: GA4AnalyticsData; isConfigured: boolean }> {
@@ -196,7 +197,7 @@ export async function fetchCMSContent(): Promise<CMSContentRecord[]> {
     const res = await adminFetch('admin/announcements');
     if (res.ok) {
       const json = await res.json();
-      if (Array.isArray(json) && json.length > 0) {
+      if (Array.isArray(json)) {
         return json.map((item: any) => ({
           id: item.id || String(item._id),
           title: item.title,
@@ -210,8 +211,10 @@ export async function fetchCMSContent(): Promise<CMSContentRecord[]> {
         }));
       }
     }
-  } catch (e) {}
-  return INITIAL_CMS_CONTENT;
+  } catch (e) {
+    console.warn('Failed to fetch CMS announcements from backend:', e);
+  }
+  return [];
 }
 
 export async function updateCMSStatus(id: string, status: 'Published' | 'Unpublished'): Promise<boolean> {
@@ -275,12 +278,14 @@ export async function fetchNotifications(): Promise<NotificationCampaign[]> {
     const res = await adminFetch('admin/notifications');
     if (res.ok) {
       const json = await res.json();
-      if (json.notifications && Array.isArray(json.notifications) && json.notifications.length > 0) {
+      if (json.notifications && Array.isArray(json.notifications)) {
         return json.notifications;
       }
     }
-  } catch (e) {}
-  return INITIAL_NOTIFICATION_CAMPAIGNS;
+  } catch (e) {
+    console.warn('Failed to fetch notification campaigns from backend:', e);
+  }
+  return [];
 }
 
 export async function fetchInfrastructureStatus(): Promise<InfrastructureItem[]> {

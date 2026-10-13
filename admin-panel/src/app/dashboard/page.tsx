@@ -27,12 +27,14 @@ import { ExecutiveKPIs } from '@/types/admin';
 export default function ExecutiveDashboard() {
   const [kpis, setKpis] = useState<ExecutiveKPIs | null>(null);
   const [dataLabel, setDataLabel] = useState('Loading live telemetry...');
+  const [isLive, setIsLive] = useState(false);
   const [activeDrilldown, setActiveDrilldown] = useState<{ title: string; detail: string; metric: string } | null>(null);
 
   useEffect(() => {
-    fetchExecutiveKPIs().then(({ data, source }) => {
+    fetchExecutiveKPIs().then(({ data, source, isLive: live }) => {
       setKpis(data);
       setDataLabel(source);
+      setIsLive(live);
     });
   }, []);
 
@@ -47,14 +49,25 @@ export default function ExecutiveDashboard() {
     );
   }
 
+  const adherenceRate =
+    kpis.remindersCompleted + kpis.remindersMissed > 0
+      ? ((kpis.remindersCompleted / (kpis.remindersCompleted + kpis.remindersMissed)) * 100).toFixed(1)
+      : null;
+
   return (
     <Shell>
       {/* Top Banner / Pulse Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl glass-card border border-sky-500/20 bg-gradient-to-r from-sky-950/40 via-slate-900 to-indigo-950/40 relative overflow-hidden">
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold tracking-wide">
-              LIVE TELEMETRY
+            <span
+              className={`px-2.5 py-0.5 rounded-full ${
+                isLive
+                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                  : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+              } border text-[10px] font-mono font-bold tracking-wide`}
+            >
+              {isLive ? 'LIVE TELEMETRY' : 'STANDBY / SNAPSHOT'}
             </span>
             <span className="text-xs text-slate-400 font-mono">• {dataLabel}</span>
           </div>
@@ -67,11 +80,13 @@ export default function ExecutiveDashboard() {
         <div className="flex items-center gap-3 z-10">
           <div className="px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">System Adherence</span>
-            <span className="text-sm font-bold text-emerald-400">91.2%</span>
+            <span className="text-sm font-bold text-emerald-400">
+              {adherenceRate ? `${adherenceRate}%` : isLive ? '100.0%' : '91.2% (Standby)'}
+            </span>
           </div>
           <div className="px-4 py-2 rounded-2xl bg-slate-900/90 border border-slate-800 text-center">
             <span className="text-[10px] uppercase font-mono text-slate-400 block">MRR Growth</span>
-            <span className="text-sm font-bold text-sky-400">+14.8%</span>
+            <span className="text-sm font-bold text-sky-400">{isLive ? '+14.8%' : '+14.8% (Standby)'}</span>
           </div>
         </div>
       </div>
