@@ -192,6 +192,8 @@ export interface PillCareUserRecord {
   state?: string;
   remindersCount: number;
   adherenceScore: number; // percentage
+  streakDays?: number;
+  streakShield?: boolean;
   ltvValueINR: number;
   caregiverPhone?: string;
   overrides?: Record<string, boolean>;
@@ -255,8 +257,10 @@ export interface NotificationCampaign {
   id: string;
   title: string;
   body: string;
-  channels: ('push' | 'email' | 'sms')[];
+  channels: ('push' | 'email' | 'sms' | 'in_app')[];
   targetAudience: 'all' | 'free_users' | 'premium_users' | 'inactive_7d' | 'custom';
+  targetCountry?: string;
+  imageUrl?: string;
   scheduledAt?: string;
   sentAt?: string;
   status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled';
@@ -321,10 +325,48 @@ export interface AuditLogRecord {
 export interface SystemReport {
   id: string;
   title: string;
-  category: 'users' | 'revenue' | 'medication' | 'ai' | 'security' | 'compliance';
+  category: 'users' | 'revenue' | 'medication' | 'ai' | 'security' | 'compliance' | 'system';
   format: 'CSV' | 'PDF' | 'JSON';
   generatedAt: string;
   generatedBy: string;
   sizeBytes: number;
   downloadUrl: string;
+}
+
+export interface StreakCompetitionRecord {
+  id: string;
+  title: string;
+  description: string;
+  prize_pool: string;
+  target_streak: number;
+  participants_count: number;
+  status: 'active' | 'upcoming' | 'paused' | 'completed';
+  badge_reward: string;
+  start_date: string;
+  end_date: string;
+  rules?: string[];
+}
+
+export interface StreakLeaderboardEntry {
+  rank: number;
+  userId: string;
+  name: string;
+  email: string;
+  streakDays: number;
+  adherenceRate: number;
+  points: number;
+  tier: string;
+  shieldActive: boolean;
+  plan: string;
+  lastActive: string;
+}
+
+export interface StreakDashboardAnalytics {
+  totalActiveStreaks: number;
+  avgStreakDays: number;
+  maxStreakDays: number;
+  atRiskCount: number;
+  streakBrackets: Record<string, number>;
+  competitions: StreakCompetitionRecord[];
+  leaderboard: StreakLeaderboardEntry[];
 }

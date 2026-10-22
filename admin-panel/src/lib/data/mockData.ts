@@ -97,7 +97,7 @@ export const INITIAL_GA4_DATA: GA4AnalyticsData = {
 };
 
 export const INITIAL_GTM_CONFIG: GTMContainerConfig = {
-  containerId: 'GTM-P8KL99M',
+  containerId: 'GTM-W8T9DWZL',
   status: 'Published',
   publishedVersion: 14,
   draftVersion: 15,
@@ -690,5 +690,15 @@ export const INITIAL_REPORTS: SystemReport[] = [
     generatedBy: 'developer@pillcare.in',
     sizeBytes: 420000,
     downloadUrl: '#',
+  },
+  {
+    id: 'rep_04',
+    title: 'Chief Engineer Sentinel Telemetry & Bug Diagnostic Audit',
+    category: 'system',
+    format: 'PDF',
+    generatedAt: '2026-10-15T18:00:00Z',
+    generatedBy: 'sentinel_agent@pillcare.in',
+    sizeBytes: 1250000,
+    downloadUrl: '/api/admin/agent/run-telemetry-audit',
   },
 ];
